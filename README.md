@@ -1,44 +1,29 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Ghost - A Word Game
 
-## Available Scripts
+## Main Rules
+This is a 2+ player word game. The game starts with the first player picking a letter. Taking turns, each player adds a letter to the current string. The first player to spell a real word becomes the Wordsmith, and is immediately killed. However, if you add a letter such that the string no longer _can become_ a word, you lose, but _only_ if the next player catches your bluff.
 
-In the project directory, you can run:
+On your turn, you can either add a letter to the end of the current string, or if you suspect the player before you couldn't think of a word and was just bluffing, you can challenge the last player's move. If you challenge the previous player, they must provide an example word that could be constructed from the current string (including the letter they just added). If they can't come up with an example, then they're out of the game. But if they _can_, you must be punished for your lack of faith: you're out of the game.
 
-### `npm start`
+May the best man never spell anything!
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Future features:
+1. Bidirectional Ghost: Players can either also add a letter to the _beginning_ of the string
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+2. House Rules - Challenge & Add Letter VS Challenge Only: Allow users to choose whether a player must also add a letter if their challenge is successful, or if they're allowed to pass
 
-### `npm test`
+3. Custom Dictionaries: Allow the user to define custom words they want to be considered valid.
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4. House Rules - Auto-Kill Bluffers: Let user decide if they want the game to automatically kill players for submitting invalid strings
 
-### `npm run build`
+5. House Rules - Auto-Kill Wordsmith: Let user decide if they want the game to automatically kill players who complete a word, or if they want the next player to be responsible for challenging the Wordsmith
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+6. House Rules - Character Limits: Allow user to define the minimum number of characters for a string to be considered a word (e.g. set to 4 so that player "ax" + "e" doesn't make you a Wordsmith)
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+7. House Rules - Play continues after Wordsmith dies: Allow user to decide whether becoming a Wordsmith immediately ends the game, or whether the remaining players are allowed to continue using the string
+	NOTE: need to make a new temp dictionary by pruning the current string from the real dictionary
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+8. Difficulty Modes: Implement multiple difficulty levels for AI players by defining different dictionary files containing simple VS rare words that they can draw from when playing, and making it so that the AI won't just randomly select a letter, but will always work towards building a possible word without actually completing it.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+#Developer Notes:
+Maybe I should add a PossibleWords property to GhostGame that contains a list of all possible words that could be constructed from the current string, and which updates every turn. This would be a good debugging tool, regardless. When there's lots of matches, it should display a sample 9 words: the 3 shortest words, 3 longest words, and 3 words from the middle of the list. Need to sort the list of candidate words by length and grab the first 3, last 3, and 3 from the middle with an even/odd length if statement.

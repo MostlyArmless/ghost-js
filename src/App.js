@@ -1,28 +1,84 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import TextBox from './components/TextBox';
 
 class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
-    );
-  }
+	constructor() {
+		super();
+
+		this.state = {
+			gameOptions: {
+				numAiPlayers: 1,
+				numHumanPlayers: 1
+			},
+			players: [
+				"Player A",
+				"Player B"
+			],
+			currentPlayerIndex: 0,
+			wordDict: new Set([
+				'apple',
+				'app',
+				'apres',
+				'apringle',
+				'banana',
+				'coin',
+				'disaster',
+				'epilepsy',
+				'francophone',
+				'gash',
+				'hate',
+				'ilk',
+				'jest',
+				'killarney',
+				'lemon',
+				'mongoose',
+				'niagra',
+				'operation',
+				'pestilence',
+				'quetzlcoatl',
+				'rabid',
+				'set',
+				'tupperware',
+				'uppercut',
+				'volvo',
+				'wiggle',
+				'xylophone',
+				'yarn',
+				'zed'])
+		}
+		
+	}
+
+	checkForWord = (testWord) => {
+		return this.state.wordDict.has(testWord);
+	}
+
+	nextTurn = () => {
+		this.setState((previousState) => {
+			return {
+				currentPlayerIndex: (previousState.currentPlayerIndex + 1) % 2
+			}
+		})
+	}
+
+	getCurrentPlayer = () => {
+		console.log(this.state.currentPlayerIndex)
+		return this.state.players[this.state.currentPlayerIndex];
+	}
+
+	render() {
+		return (
+			<div className="App">
+				<p>Ghost Game</p>
+				<p>It is currently {this.getCurrentPlayer()}'s turn</p>
+				<TextBox
+					checkForWord={this.checkForWord}
+					nextTurn={this.nextTurn}
+					/>
+			</div>
+		);
+	}
 }
 
 export default App;
