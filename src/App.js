@@ -13,6 +13,8 @@ const initialState = {
     "Player A",
     "Player B"
   ],
+  nextChar: '',
+  gameString: '',
   currentPlayerIndex: 0,
   wordDict: new Set([
     'apple',
@@ -51,11 +53,25 @@ class App extends Component {
     this.state = initialState;
   }
 
-  gameOver() {
+  gameOver(updatedGameString) {
     console.log('Game over...');
     this.setState({
-      gameState: 'gameOver'
+      gameState: 'gameOver',
+      gameString: updatedGameString
     })
+  }
+
+  commitNextChar = () => {
+    console.log(`committing next char '${this.state.nextChar}'...`);
+    const updatedGameString = this.state.gameString + this.state.nextChar;
+    
+    if (this.checkForWord(updatedGameString)) {
+      // The last player spelled a word, so it's game over
+      this.gameOver(updatedGameString);
+    }
+    else {
+      this.nextTurn(updatedGameString);
+    }
   }
 
   checkForWord = (testWord) => {
@@ -64,19 +80,14 @@ class App extends Component {
   }
 
   nextTurn = (updatedGameString) => {
-    console.log(`Calculating next turn with word '${updatedGameString}'`);
-    if (this.checkForWord(updatedGameString)) {
-      // The last player spelled a word, so it's game over
-      this.gameOver();
-    }
-    else {
       this.setState((previousState) => {
         return ({
-          currentPlayerIndex: (previousState.currentPlayerIndex + 1) % 2
+        currentPlayerIndex: (previousState.currentPlayerIndex + 1) % 2,
+        nextChar: '',
+        gameString: updatedGameString
         });
       });
     }
-  }
 
   getCurrentPlayer = () => {
     console.log('Get current player...');
@@ -88,24 +99,42 @@ class App extends Component {
     this.setState(initialState);
   }
 
+  onTextChange = (event) => {
+    console.log(`onTextChange ${event.target.value}`);
+    this.setState({
+      nextChar: event.target.value
+    });
+  }
+
   render() {
     let page = <h1>Ghost Game</h1>;
 
     switch (this.state.gameState) {
       case 'playing':
         page = <Play
-          getCurrentPlayer={this.getCurrentPlayer}/>;
+          onTextChange={this.onTextChange}
+          nextChar={this.state.nextChar}
+          gameString={this.state.gameString}
+          getCurrentPlayer={this.getCurrentPlayer}
+          commitNextChar={this.commitNextChar}
+          wordDict={this.state.wordDict}/>;
         break;
       case 'gameOver':
-        page += (
+        page = 
           <GameOver
+            losingPlayer={this.getCurrentPlayer()}
+            gameString={this.state.gameString}
             handleClick={this.resetGame}/>
-        );
         break;
       default:
-        return (<p>Invalid gameState.</p>);
+        page = (<p>Invalid gameState.</p>);
     }
-    return page;
+
+    return (
+      <div className='App'>
+        {page}
+      </div>
+    );
   }
 }
 
