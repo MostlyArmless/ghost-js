@@ -13,7 +13,7 @@ if (newComponentName.length === 0) {
     return;
 }
 if (!funcOrClass) {
-    funcOrClass = 'function';
+    funcOrClass = 'class';
 }
 else {
     if (funcOrClass === '-f') {
