@@ -22,6 +22,7 @@ const initialState = {
   currentPlayerIndex: 0,
   wordDict: new Set([
     'apple',
+    'apples',
     'app',
     'apres',
     'apringle',
@@ -79,6 +80,10 @@ class App extends Component {
   }
 
   checkForWord = (testWord) => {
+    if (testWord.length < this.state.gameSettings.minWordLength) {
+      console.log('Word too short, not checking');
+      return false;
+    }
     console.log(`Checking for word '${testWord}'...`);
     return this.state.wordDict.has(testWord);
   }
@@ -172,7 +177,6 @@ class App extends Component {
   }
 
   handleRemovePlayer = (index) => {
-    // console.log(`Remove player:\n${JSON.stringify(index)}`);
     this.setState((previousState) => {
       const players = previousState.players;
       players.splice(index, 1);
