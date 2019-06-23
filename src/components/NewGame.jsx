@@ -1,15 +1,11 @@
 import React from 'react';
 import { Button } from './Button';
 import { NameField } from './NameField';
+import { PlayerTypeSelect } from './PlayerTypeSelect';
 
 export class NewGame extends React.Component {
   onListUpdated(list) {
     console.log("Got updated list:", list)
-  }
-
-  handleClick = (index, event) => {
-    console.log(index, event);
-    // this.props.handleStartClicked(event.target.value, index);
   }
 
   render() {
@@ -18,14 +14,13 @@ export class NewGame extends React.Component {
       return (
         <div key={id+"_div"}>
           <NameField
-            player={player}
+            playerName={player.name}
             id={id}
             handleChangeName={this.props.handleChangeName}/>
           
-          <select value={player.type} onChange={this.props.handleChangePlayerType}>
-            <option value={'Human'}>Human</option>
-            <option value={'AI'}>AI</option>
-          </select>
+          <PlayerTypeSelect
+            id={id}
+            playerType={player.type}/>
 
           {id > 0 &&
             <Button
@@ -35,7 +30,6 @@ export class NewGame extends React.Component {
               text='Delete'
             />
           }
-          <br />
         </div>
       );
     })
@@ -53,6 +47,7 @@ export class NewGame extends React.Component {
           onClick={this.props.handleStartClicked}>
           Start Game
         </button>
+        <button onClick={this.props.handleSettingsClicked}>Settings</button>
         <fieldset>
           {listItems}
           <button

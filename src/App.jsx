@@ -3,6 +3,7 @@ import './App.css';
 import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
 import { NewGame } from './components/NewGame';
+import { GameSettings } from './components/GameSettings';
 
 const initialState = {
   gameState: 'newGame',
@@ -103,8 +104,7 @@ class App extends Component {
     this.setState(initialState);
   }
 
-  handleTextChange = (event) => {
-    console.log(`onTextChange ${event.target.value}`);
+  handleNextCharChange = (event) => {
     this.setState({
       nextChar: event.target.value
     });
@@ -139,8 +139,25 @@ class App extends Component {
     });
   }
 
-  handleChangePlayerType = () => {
-    console.log('NOT YET IMPLEMENTED');
+  handleChangePlayerType = (index, newType) => {
+    this.setState((previousState) => {
+      const players = previousState.players;
+      players[index].type = newType;
+      return {
+        players: players
+      }
+    })
+  }
+
+  handleChangeMinWordLength = (value) => {
+    this.setState((previousState) => {
+      let newSettings = previousState.gameSettings;
+      newSettings.minWordLength = value;
+      console.log(newSettings);
+      return {
+        gameSettings: newSettings
+      }
+    })
   }
 
   handleAddPlayer = () => {
@@ -153,6 +170,7 @@ class App extends Component {
       }
     })
   }
+
   handleRemovePlayer = (index) => {
     // console.log(`Remove player:\n${JSON.stringify(index)}`);
     this.setState((previousState) => {
@@ -162,6 +180,24 @@ class App extends Component {
         players: players
       }
     });
+  }
+
+  handleSettingsClicked = () => {
+    this.setState((previousState) => {
+      return {
+        previousGameState: previousState.gameState,
+        gameState: 'settings'
+      }
+    });
+  }
+
+  handleSettingsDoneClicked = () => {
+    this.setState((previousState) => {
+      return {
+        gameState: previousState.previousGameState,
+        previousGameState: 'settings'
+      }
+    })
   }
 
   render() {
@@ -178,11 +214,12 @@ class App extends Component {
           invalidPlayerNames={this.state.invalidPlayerNames}
           handleAddPlayer={this.handleAddPlayer}
           reset={this.resetGame}
+          handleSettingsClicked={this.handleSettingsClicked}
         />;
         break;
       case 'playing':
         page = <Play
-          onTextChange={this.handleTextChange}
+          onNextCharChange={this.handleNextCharChange}
           nextChar={this.state.nextChar}
           gameString={this.state.gameString}
           getCurrentPlayer={this.getCurrentPlayer}
@@ -195,6 +232,12 @@ class App extends Component {
             losingPlayer={this.getCurrentPlayer()}
             gameString={this.state.gameString}
             handleClick={this.resetGame} />
+        break;
+      case 'settings':
+        page = <GameSettings
+          gameSettings={this.state.gameSettings}
+          handleChangeMinWordLength={this.handleChangeMinWordLength}
+          handleSettingsDoneClicked={this.handleSettingsDoneClicked}/>;
         break;
       default:
         page = (<p>Invalid gameState.</p>);

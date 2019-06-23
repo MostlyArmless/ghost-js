@@ -16,7 +16,7 @@ export class NameField extends React.Component {
       <input
         key={this.props.id + '_name'}
         type='text'
-        value={this.props.player.name}
+        value={this.props.playerName}
         onChange={this.handleChangeName} />
     );
   }

@@ -25,7 +25,7 @@ export class Play extends React.Component {
         <p>It is currently {this.props.getCurrentPlayer().name}'s turn</p>
         <p>Enter the next character:</p>
         <input
-          onChange={this.props.onTextChange}
+          onChange={this.props.onNextCharChange}
           type='text'
           id='nextChar'
           maxLength='1'
