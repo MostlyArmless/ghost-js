@@ -55,6 +55,10 @@ export class NewGame extends React.Component {
         </button>
         <fieldset>
           {listItems}
+          <button
+            onClick={this.props.handleAddPlayer}>
+            Add Player
+        </button>
         </fieldset>
       </div>
     );

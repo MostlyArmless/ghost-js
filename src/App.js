@@ -152,13 +152,14 @@ class App extends Component {
   handleRemovePlayer = (index) => {
     // console.log(`Remove player:\n${JSON.stringify(index)}`);
     this.setState((previousState) => {
-      players.splice(index, 1);
-      players.splice(index, 1);
+      const players = previousState.players;
       players.splice(index, 1);
       return {
+        players: players
       }
     });
   }
+
   render() {
     let page = <h1>Ghost Game</h1>;
 
@@ -171,6 +172,7 @@ class App extends Component {
           handleRemovePlayer={this.handleRemovePlayer}
           handleStartClicked={this.handleStartClicked}
           invalidPlayerNames={this.state.invalidPlayerNames}
+          handleAddPlayer={this.handleAddPlayer}
           reset={this.resetGame}
         />;
         break;
