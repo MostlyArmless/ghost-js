@@ -1,17 +1,19 @@
 import React from 'react';
 
-export function Button(props) {
+export class Button extends React.Component {
   handleClick = () => {
-    if (props.onClick) {
-      props.onClick(props.id);
+    if (this.props.onClick) {
+      this.props.onClick(this.props.id);
     }
   };
 
-  return (
-    <button
-      key={props.id}
-      onClick={this.handleClick}>
-      {props.text}
-    </button>
-  );
+  render() {
+    return (
+      <button
+        key={this.props.id}
+        onClick={this.handleClick}>
+        {this.props.text}
+      </button>
+    );
+  }
 }
