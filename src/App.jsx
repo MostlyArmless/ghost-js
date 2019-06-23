@@ -12,6 +12,10 @@ const initialState = {
     { name: "Mike", type: "Human" },
     { name: "Jane", type: "Human" }
   ],
+  gameSettings: {
+    minWordLength: 4,
+    maxNumPlayers: 4
+  },
   nextChar: '',
   gameString: '',
   currentPlayerIndex: 0,
