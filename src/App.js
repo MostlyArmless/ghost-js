@@ -2,16 +2,15 @@ import React, { Component } from 'react';
 import './App.css';
 import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
+import { NewGame } from './components/NewGame';
 
 const initialState = {
-  gameState: 'playing',
-  gameOptions: {
-    numAiPlayers: 1,
-    numHumanPlayers: 1
-  },
+  gameState: 'newGame',
+  invalidPlayerNames: false,
   players: [
-    "Player A",
-    "Player B"
+    { name: "Borg", type: "AI" },
+    { name: "Mike", type: "Human" },
+    { name: "Jane", type: "Human" }
   ],
   nextChar: '',
   gameString: '',
@@ -64,7 +63,7 @@ class App extends Component {
   commitNextChar = () => {
     console.log(`committing next char '${this.state.nextChar}'...`);
     const updatedGameString = this.state.gameString + this.state.nextChar;
-    
+
     if (this.checkForWord(updatedGameString)) {
       // The last player spelled a word, so it's game over
       this.gameOver(updatedGameString);
@@ -80,14 +79,15 @@ class App extends Component {
   }
 
   nextTurn = (updatedGameString) => {
-      this.setState((previousState) => {
-        return ({
-        currentPlayerIndex: (previousState.currentPlayerIndex + 1) % 2,
+    this.setState((previousState) => {
+      const numPlayers = this.state.players.length;
+      return ({
+        currentPlayerIndex: (previousState.currentPlayerIndex + 1) % numPlayers,
         nextChar: '',
         gameString: updatedGameString
-        });
       });
-    }
+    });
+  }
 
   getCurrentPlayer = () => {
     console.log('Get current player...');
@@ -99,32 +99,96 @@ class App extends Component {
     this.setState(initialState);
   }
 
-  onTextChange = (event) => {
+  handleTextChange = (event) => {
     console.log(`onTextChange ${event.target.value}`);
     this.setState({
       nextChar: event.target.value
     });
   }
 
+  handleStartClicked = () => {
+    for (let i = 0; i < this.state.players.length; i++) {
+      const name = this.state.players[i].name;
+      if (name.length === 0) {
+        this.setState({
+          invalidPlayerNames: true
+        });
+        return;
+      }
+    }
+    
+    this.setState({
+      invalidPlayerNames: false,
+      gameState: 'playing'
+    })
+  }
+
+  handleChangeName = (index, newName) => {
+    console.log(index);
+    console.log(newName);
+    this.setState((previousState) => {
+      const newPlayerList = previousState.players;
+      newPlayerList[index].name = newName;
+      return {
+        players: newPlayerList
+      }
+    });
+  }
+
+  handleChangePlayerType = () => {
+    console.log('NOT YET IMPLEMENTED');
+  }
+
+  handleAddPlayer = () => {
+    this.setState((previousState) => {
+      return {
+        players: previousState.players.concat({
+          name:'New Player',
+          type: "Human"
+        })
+      }
+    })
+  }
+  handleRemovePlayer = (index) => {
+    // console.log(`Remove player:\n${JSON.stringify(index)}`);
+    this.setState((previousState) => {
+      players.splice(index, 1);
+      players.splice(index, 1);
+      players.splice(index, 1);
+      return {
+      }
+    });
+  }
   render() {
     let page = <h1>Ghost Game</h1>;
 
     switch (this.state.gameState) {
+      case 'newGame':
+        page = <NewGame
+          list={this.state.players}
+          handleChangeName={this.handleChangeName}
+          handleChangePlayerType={this.handleChangePlayerType}
+          handleRemovePlayer={this.handleRemovePlayer}
+          handleStartClicked={this.handleStartClicked}
+          invalidPlayerNames={this.state.invalidPlayerNames}
+          reset={this.resetGame}
+        />;
+        break;
       case 'playing':
         page = <Play
-          onTextChange={this.onTextChange}
+          onTextChange={this.handleTextChange}
           nextChar={this.state.nextChar}
           gameString={this.state.gameString}
           getCurrentPlayer={this.getCurrentPlayer}
           commitNextChar={this.commitNextChar}
-          wordDict={this.state.wordDict}/>;
+          wordDict={this.state.wordDict} />;
         break;
       case 'gameOver':
-        page = 
+        page =
           <GameOver
             losingPlayer={this.getCurrentPlayer()}
             gameString={this.state.gameString}
-            handleClick={this.resetGame}/>
+            handleClick={this.resetGame} />
         break;
       default:
         page = (<p>Invalid gameState.</p>);

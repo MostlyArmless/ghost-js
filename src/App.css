@@ -6,11 +6,6 @@ body {
   color: red;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-}
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -26,11 +21,48 @@ body {
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button {
+  border-radius: 50%;
 }
+
+.startGame {
+  height: 25px;
+  width: 100px;
+  background-color: grey;
+  /* border-radius: 15%; */
+  color: black;
+}
+
+/* .react-editable-list {
+    font-size: 14px;
+    list-style: none;
+    padding: 0;
+  }
+  .react-editable-list-item-value {
+    width: 200px;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+  .react-editable-list-item-value input {
+    width: 190px;
+  }
+  .react-editable-list-delete-button {
+    background-image: url(/resources/rubbish-bin.png);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    height: 24px;
+    width: 24px;
+    border: none;
+    font-size: 0px;
+  }
+  .react-editable-list-add-button {
+    background-image: url(/public/images/icons/add.png);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    height: 24px;
+    width: 24px;
+    border: none;
+    font-size: 0px;
+    margin-left: 200px;
+    margin-top: 5px;
+  } */

@@ -21,12 +21,13 @@ export class Play extends React.Component {
   render() {
     return (
       <div>
-        <p>It is currently {this.props.getCurrentPlayer()}'s turn</p>
+        <h1>Ghost</h1>
+        <p>It is currently {this.props.getCurrentPlayer().name}'s turn</p>
         <p>Enter the next character:</p>
         <input
           onChange={this.props.onTextChange}
           type='text'
-          id='next_char'
+          id='nextChar'
           maxLength='1'
           onKeyDown={this.onKeyDown}
           value={this.props.nextChar}
