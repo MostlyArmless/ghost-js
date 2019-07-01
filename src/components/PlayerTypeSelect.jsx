@@ -18,7 +18,7 @@ export class PlayerTypeSelect extends React.Component {
   // TODO - figure out how to render all the things on the same line even though we're returning a div here
   render() {
     return (
-      <div>
+      <>
         <select
           value={this.props.playerType}
           onChange={this.handleChangePlayerType}
@@ -26,7 +26,7 @@ export class PlayerTypeSelect extends React.Component {
           <option value={'Human'}>Human</option>
           <option value={'AI'}>AI</option>
         </select>
-      </div>
+      </>
     );
   }
 }
