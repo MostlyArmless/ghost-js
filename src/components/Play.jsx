@@ -7,21 +7,26 @@ const initialState = {
 }
 export class Play extends React.Component {
   constructor(props) {
-    super();
+    super(props);
     this.state = initialState;
   }
 
   onKeyDown = (event) => {
     if (event.keyCode === ENTER_KEY_CODE) {
-      console.log('You hit ENTER');
       this.props.commitNextChar();
     }
   }
 
   render() {
-    const possibleWords = this.props.possibleWords.map((word) => {
+    const possibleWordList = this.props.possibleWordList.map((word) => {
       return <li>{word}</li>;
-    })
+    });
+
+    const bullshitButton = this.props.gameString.length > 0 &&
+      <button
+        onClick={this.props.onCallBullshit}>
+        Call Bullshit on {this.props.getPreviousPlayer().name}
+      </button>;
 
     return (
       <div>
@@ -43,10 +48,11 @@ export class Play extends React.Component {
           id='gameString'
           readOnly={true}
         />
+        {bullshitButton}
         <p>
           Possible words:
           <ol>
-            {possibleWords}
+            {possibleWordList}
           </ol>
         </p>
       </div>

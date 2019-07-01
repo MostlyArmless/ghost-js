@@ -4,6 +4,7 @@ import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
 import { NewGame } from './components/NewGame';
 import { GameSettingsPage } from './components/GameSettingsPage';
+import { checkForWord, getPossibleWords } from './API'
 
 const initialState = {
   gameState: 'newGame',
@@ -33,8 +34,11 @@ const initialState = {
   },
   nextChar: '',
   gameString: '',
-  possibleWords: [],
-  currentPlayerIndex: 0
+  currentPlayerIndex: 0,
+  gameOverReason: '',
+  possibleWordList: [],
+  loser: {},
+  winner: {}
 }
 
 class App extends Component {
@@ -58,10 +62,10 @@ class App extends Component {
     
     // Ask the server for a list of all words that start with the current game string
     if (updatedGameString.length >= this.state.gameSettings.minimumWordLength.value - 1) {
-      const possibleWordList = await this.getPossibleWords(updatedGameString);
+      const possibleWordList = await getPossibleWords(updatedGameString);
       if (possibleWordList.length > 0) {
         this.setState({
-          possibleWords: possibleWordList
+          possibleWordList: possibleWordList
         });
       }
       else {
@@ -70,7 +74,7 @@ class App extends Component {
       }
     }
 
-    if (await this.checkForWord(updatedGameString)) {
+    if (this.state.gameString.length >= this.state.gameSettings.minimumWordLength && await checkForWord(updatedGameString)) {
       if (this.state.wordRecognitionMode) {
         alert("Bullshit!");
       }
@@ -82,23 +86,6 @@ class App extends Component {
     else {
       this.nextTurn(updatedGameString);
     }
-  }
-  checkForWord = async (testWord) => {
-    if (testWord.length < this.state.gameSettings.minimumWordLength.value) {
-      console.log('Word too short, not checking');
-      return false;
-    }
-    console.log(`Checking for word '${testWord}'...`);
-    const response = await window.fetch(`http://localhost:3001/isword/${testWord}`);
-    const actualResponse = await response.json();
-    return actualResponse.isWord;
-  }
-
-  getPossibleWords = async (wordPart) => {
-    const response = await window.fetch(`http://localhost:3001/possiblewords/${wordPart}`);
-    const possibleWordList = await response.json();
-    console.log(`Possible words: ${possibleWordList}`);
-    return possibleWordList;
   }
 
   nextTurn = (updatedGameString) => {
@@ -115,6 +102,11 @@ class App extends Component {
   getCurrentPlayer = () => {
     console.log('Get current player...');
     return this.state.players[this.state.currentPlayerIndex];
+  }
+
+  getPreviousPlayer = () => {
+    const previousPlayerIndex = this.state.currentPlayerIndex === 0 ? this.state.players.length - 1 : this.state.currentPlayerIndex - 1;
+    return this.state.players[previousPlayerIndex];
   }
 
   resetGame = () => {
@@ -218,6 +210,27 @@ class App extends Component {
     })
   }
 
+  handleCallBullshit = async () => {
+    const possibleWordList = await getPossibleWords(this.state.gameString);
+    if (possibleWordList.length > 0) {
+      this.setState({
+        gameState: 'gameOver',
+        gameOverReason: 'badBullshitCall',
+        loser: this.getCurrentPlayer(),
+        winner: this.getPreviousPlayer(),
+        possibleWordList: possibleWordList
+      });
+    }
+    else {
+      this.setState({
+        gameState: 'gameOver',
+        gameOverReason: 'goodBullshitCall',
+        loser: this.getPreviousPlayer(),
+        winner: this.getCurrentPlayer()
+      });
+    }
+  }
+
   render() {
     let page = <h1>Ghost Game</h1>;
 
@@ -241,16 +254,20 @@ class App extends Component {
           nextChar={this.state.nextChar}
           gameString={this.state.gameString}
           getCurrentPlayer={this.getCurrentPlayer}
+          getPreviousPlayer={this.getPreviousPlayer}
           commitNextChar={this.commitNextChar}
-          possibleWords={this.state.possibleWords}/>;
+          possibleWordList={this.state.possibleWordList}
+          onCallBullshit={this.handleCallBullshit}/>;
         break;
       case 'gameOver':
         page =
           <GameOver
-            losingPlayer={this.getCurrentPlayer()}
+            losingPlayer={this.state.loser}
+            winningPlayer={this.state.winner}
             gameString={this.state.gameString}
             gameOverReason={this.state.gameOverReason}
-            handleClick={this.resetGame} />
+            handleClick={this.resetGame}
+            possibleWordList={this.state.possibleWordList}/>
         break;
       case 'settings':
         page = <GameSettingsPage
