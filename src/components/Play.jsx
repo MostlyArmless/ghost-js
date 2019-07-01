@@ -19,6 +19,10 @@ export class Play extends React.Component {
   }
 
   render() {
+    const possibleWords = this.props.possibleWords.map((word) => {
+      return <li>{word}</li>;
+    })
+
     return (
       <div>
         <h1>Ghost</h1>
@@ -39,6 +43,12 @@ export class Play extends React.Component {
           id='gameString'
           readOnly={true}
         />
+        <p>
+          Possible words:
+          <ol>
+            {possibleWords}
+          </ol>
+        </p>
       </div>
     );
   }
