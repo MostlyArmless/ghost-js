@@ -3,10 +3,11 @@ import './App.css';
 import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
 import { NewGame } from './components/NewGame';
-import { GameSettings } from './components/GameSettings';
+import { GameSettingsPage } from './components/GameSettingsPage';
 
 const initialState = {
   gameState: 'newGame',
+  previousGameState: 'newGame',
   invalidPlayerNames: false,
   players: [
     { name: "Borg", type: "AI" },
@@ -14,78 +15,90 @@ const initialState = {
     { name: "Jane", type: "Human" }
   ],
   gameSettings: {
-    minWordLength: 4,
-    maxNumPlayers: 4
+    minimumWordLength: {
+      title: "Minimum Word Length",
+      value: 4,
+      options: [3,4,5,6]
+    },
+    maxNumPlayers: {
+      title: "Maximum Number of Players",
+      value: 4,
+      options: [3,4,5]
+    },
+    wordRecognitionMode: {
+      title: "Word Recognition Mode",
+      value: 'auto',
+      options: ['auto','manual']
+    },
   },
   nextChar: '',
   gameString: '',
-  currentPlayerIndex: 0,
-  wordDict: new Set([
-    'apple',
-    'apples',
-    'app',
-    'apres',
-    'apringle',
-    'banana',
-    'coin',
-    'disaster',
-    'epilepsy',
-    'francophone',
-    'gash',
-    'hate',
-    'ilk',
-    'jest',
-    'killarney',
-    'lemon',
-    'mongoose',
-    'niagra',
-    'operation',
-    'pestilence',
-    'quetzlcoatl',
-    'rabid',
-    'set',
-    'tupperware',
-    'uppercut',
-    'volvo',
-    'wiggle',
-    'xylophone',
-    'yarn',
-    'zed'])
+  possibleWords: [],
+  currentPlayerIndex: 0
 }
+
 class App extends Component {
   constructor() {
     super();
     this.state = initialState;
   }
 
-  gameOver(updatedGameString) {
-    console.log('Game over...');
+  gameOver(updatedGameString, gameOverReason) {
+    console.log(`Game over because ${gameOverReason}...`);
     this.setState({
       gameState: 'gameOver',
-      gameString: updatedGameString
-    })
+      gameString: updatedGameString,
+      gameOverReason: gameOverReason
+    });
   }
 
-  commitNextChar = () => {
+  commitNextChar = async () => {
     console.log(`committing next char '${this.state.nextChar}'...`);
     const updatedGameString = this.state.gameString + this.state.nextChar;
+    
+    // Ask the server for a list of all words that start with the current game string
+    if (updatedGameString.length >= this.state.gameSettings.minimumWordLength.value - 1) {
+      const possibleWordList = await this.getPossibleWords(updatedGameString);
+      if (possibleWordList.length > 0) {
+        this.setState({
+          possibleWords: possibleWordList
+        });
+      }
+      else {
+        this.gameOver(updatedGameString, 'noPossibleWords');
+        return;
+      }
+    }
 
-    if (this.checkForWord(updatedGameString)) {
-      // The last player spelled a word, so it's game over
-      this.gameOver(updatedGameString);
+    if (await this.checkForWord(updatedGameString)) {
+      if (this.state.wordRecognitionMode) {
+        alert("Bullshit!");
+      }
+      else {
+        // The last player spelled a word, so it's game over
+        this.gameOver(updatedGameString, 'finishedWord');
+      }
     }
     else {
       this.nextTurn(updatedGameString);
     }
   }
-
-  checkForWord = (testWord) => {
-    if (testWord.length < this.state.gameSettings.minWordLength) {
+  checkForWord = async (testWord) => {
+    if (testWord.length < this.state.gameSettings.minimumWordLength.value) {
       console.log('Word too short, not checking');
       return false;
     }
     console.log(`Checking for word '${testWord}'...`);
-    return this.state.wordDict.has(testWord);
+    const response = await window.fetch(`http://localhost:3001/isword/${testWord}`);
+    const actualResponse = await response.json();
+    return actualResponse.isWord;
+  }
+
+  getPossibleWords = async (wordPart) => {
+    const response = await window.fetch(`http://localhost:3001/possiblewords/${wordPart}`);
+    const possibleWordList = await response.json();
+    console.log(`Possible words: ${possibleWordList}`);
+    return possibleWordList;
   }
 
   nextTurn = (updatedGameString) => {
@@ -125,7 +138,7 @@ class App extends Component {
         return;
       }
     }
-    
+
     this.setState({
       invalidPlayerNames: false,
       gameState: 'playing'
@@ -133,8 +146,6 @@ class App extends Component {
   }
 
   handleChangeName = (index, newName) => {
-    console.log(index);
-    console.log(newName);
     this.setState((previousState) => {
       const newPlayerList = previousState.players;
       newPlayerList[index].name = newName;
@@ -154,22 +165,25 @@ class App extends Component {
     })
   }
 
-  handleChangeMinWordLength = (value) => {
+  handleChangeGameSetting = (settingName, value) => {
     this.setState((previousState) => {
       let newSettings = previousState.gameSettings;
-      newSettings.minWordLength = value;
+      const settingIndex = newSettings.findIndex((setting) => {
+        return setting.title === settingName;
+      });
+      newSettings[settingIndex].value = value;
       console.log(newSettings);
       return {
         gameSettings: newSettings
       }
-    })
+    });
   }
 
   handleAddPlayer = () => {
     this.setState((previousState) => {
       return {
         players: previousState.players.concat({
-          name:'New Player',
+          name: 'New Player',
           type: "Human"
         })
       }
@@ -228,20 +242,21 @@ class App extends Component {
           gameString={this.state.gameString}
           getCurrentPlayer={this.getCurrentPlayer}
           commitNextChar={this.commitNextChar}
-          wordDict={this.state.wordDict} />;
+          possibleWords={this.state.possibleWords}/>;
         break;
       case 'gameOver':
         page =
           <GameOver
             losingPlayer={this.getCurrentPlayer()}
             gameString={this.state.gameString}
+            gameOverReason={this.state.gameOverReason}
             handleClick={this.resetGame} />
         break;
       case 'settings':
-        page = <GameSettings
+        page = <GameSettingsPage
           gameSettings={this.state.gameSettings}
-          handleChangeMinWordLength={this.handleChangeMinWordLength}
-          handleSettingsDoneClicked={this.handleSettingsDoneClicked}/>;
+          handleChangeGameSetting={this.handleChangeGameSetting}
+          handleSettingsDoneClicked={this.handleSettingsDoneClicked} />;
         break;
       default:
         page = (<p>Invalid gameState.</p>);
