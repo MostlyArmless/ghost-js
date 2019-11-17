@@ -19,7 +19,7 @@ export class Play extends React.Component {
 
   render() {
     const possibleWordList = this.props.possibleWordList.map((word) => {
-      return <li>{word}</li>;
+      return <li key={word}>{word}</li>;
     });
 
     const bullshitButton = this.props.gameString.length > 0 &&
@@ -49,12 +49,12 @@ export class Play extends React.Component {
           readOnly={true}
         />
         {bullshitButton}
-        <p>
+        <div>
           Possible words:
           <ol>
             {possibleWordList}
           </ol>
-        </p>
+        </div>
       </div>
     );
   }

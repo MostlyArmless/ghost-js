@@ -1,6 +1,11 @@
 # Ghost - A Word Game
 
+## Developer Notes
+
+To run this in development mode, just debug main in VS Code.
+
 ## Main Rules
+
 This is a 2+ player word game. The game starts with the first player picking a letter. Taking turns, each player adds a letter to the current string. The first player to spell a real word becomes the Wordsmith, and is immediately killed. However, if you add a letter such that the string no longer _can become_ a word, you lose, but _only_ if the next player catches your bluff.
 
 On your turn, you can either add a letter to the end of the current string, or if you suspect the player before you couldn't think of a word and was just bluffing, you can challenge the last player's move. If you challenge the previous player, they must provide an example word that could be constructed from the current string (including the letter they just added). If they can't come up with an example, then they're out of the game. But if they _can_, you must be punished for your lack of faith: you're out of the game.
@@ -8,6 +13,7 @@ On your turn, you can either add a letter to the end of the current string, or i
 May the best man never spell anything!
 
 ## Future features:
+
 1. Bidirectional Ghost: Players can either also add a letter to the _beginning_ of the string
 
 2. House Rules - Challenge & Add Letter VS Challenge Only: Allow users to choose whether a player must also add a letter if their challenge is successful, or if they're allowed to pass

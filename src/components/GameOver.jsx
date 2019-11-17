@@ -18,16 +18,16 @@ export function GameOver(props) {
 
     case 'badBullshitCall':
       loserReason = (
-      <>
-        <p>{props.losingPlayer.name} lost because they incorrectly called bullshit on {props.winningPlayer.name}.</p>
-        <br/>
-        <p>Here are some words that start with {props.gameString}:</p>
-        <ol>
-          {props.possibleWordList.map(word => {
-            return <li>{word}</li>;
-          })}
-        </ol>
-      </>
+        <>
+          <p>{props.losingPlayer.name} lost because they incorrectly called bullshit on {props.winningPlayer.name}.</p>
+          <br />
+          <p>Here are some words that start with {props.gameString}:</p>
+          <ol>
+            {props.possibleWordList.map(word => {
+              return <li key={word}>{word}</li>;
+            })}
+          </ol>
+        </>
       );
       break;
 
@@ -35,7 +35,7 @@ export function GameOver(props) {
       console.log(props);
       loserReason = <p>Game ended for unknown reason</p>
   }
-  
+
   return (
     <div className='App'>
       <h1>GAME OVER</h1>

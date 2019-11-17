@@ -3,7 +3,16 @@ import { Button } from './Button';
 import { NameField } from './NameField';
 import { PlayerTypeSelect } from './PlayerTypeSelect';
 
+const initialState = {
+  dummyValue: 1
+}
 export class NewGame extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = initialState;
+  }
+
   onListUpdated(list) {
     console.log("Got updated list:", list)
   }
@@ -12,15 +21,16 @@ export class NewGame extends React.Component {
     const invalidPlayerWarning = <h2>Player names can't be blank</h2>
     const listItems = this.props.list.map((player, id) => {
       return (
-        <div key={id+"_div"}>
+        <div key={id + "_div"}>
           <NameField
             playerName={player.name}
             id={id}
-            handleChangeName={this.props.handleChangeName}/>
-          
+            handleChangeName={this.props.handleChangeName} />
+
           <PlayerTypeSelect
             id={id}
-            playerType={player.type}/>
+            playerType={player.type}
+            handleChangePlayerType={this.props.handleChangePlayerType} />
 
           {id > 0 &&
             <Button

@@ -1,12 +1,37 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import './App.css';
 import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
 import { NewGame } from './components/NewGame';
 import { GameSettingsPage } from './components/GameSettingsPage';
 import { checkForWord, getPossibleWords } from './API'
+import {
+  PlayerType,
+  Player,
+  GameSetting,
+  GameSettings
+} from './interfaces';
 
-const initialState = {
+interface AppProps {
+
+}
+
+interface AppState {
+  gameState: string;
+  previousGameState: string;
+  invalidPlayerNames: boolean;
+  players: Player[];
+  gameSettings: GameSettings;
+  nextChar: string;
+  gameString: string;
+  currentPlayerIndex: number;
+  gameOverReason: string;
+  possibleWordList: string[];
+  loser: any;
+  winner: any;
+}
+
+const initialState: AppState = {
   gameState: 'newGame',
   previousGameState: 'newGame',
   invalidPlayerNames: false,
@@ -19,17 +44,17 @@ const initialState = {
     minimumWordLength: {
       title: "Minimum Word Length",
       value: 4,
-      options: [3,4,5,6]
+      options: [3, 4, 5, 6]
     },
     maxNumPlayers: {
       title: "Maximum Number of Players",
       value: 4,
-      options: [3,4,5]
+      options: [3, 4, 5]
     },
     wordRecognitionMode: {
       title: "Word Recognition Mode",
       value: 'auto',
-      options: ['auto','manual']
+      options: ['auto', 'manual']
     },
   },
   nextChar: '',
@@ -41,13 +66,14 @@ const initialState = {
   winner: {}
 }
 
-class App extends Component {
-  constructor() {
-    super();
+
+class App extends React.Component<AppProps, AppState> {
+  constructor(props: AppProps) {
+    super(props);
     this.state = initialState;
   }
 
-  gameOver(updatedGameString, gameOverReason) {
+  gameOver(updatedGameString: string, gameOverReason: string) {
     console.log(`Game over because ${gameOverReason}...`);
     this.setState({
       gameState: 'gameOver',
@@ -59,7 +85,7 @@ class App extends Component {
   commitNextChar = async () => {
     console.log(`committing next char '${this.state.nextChar}'...`);
     const updatedGameString = this.state.gameString + this.state.nextChar;
-    
+
     // Ask the server for a list of all words that start with the current game string
     if (updatedGameString.length >= this.state.gameSettings.minimumWordLength.value - 1) {
       const possibleWordList = await getPossibleWords(updatedGameString);
@@ -74,8 +100,8 @@ class App extends Component {
       }
     }
 
-    if (this.state.gameString.length >= this.state.gameSettings.minimumWordLength && await checkForWord(updatedGameString)) {
-      if (this.state.wordRecognitionMode) {
+    if (this.state.gameString.length >= this.state.gameSettings.minimumWordLength.value && await checkForWord(updatedGameString)) {
+      if (this.state.gameSettings.wordRecognitionMode) {
         alert("Bullshit!");
       }
       else {
@@ -88,8 +114,8 @@ class App extends Component {
     }
   }
 
-  nextTurn = (updatedGameString) => {
-    this.setState((previousState) => {
+  nextTurn = (updatedGameString: string) => {
+    this.setState((previousState: AppState) => {
       const numPlayers = this.state.players.length;
       return ({
         currentPlayerIndex: (previousState.currentPlayerIndex + 1) % numPlayers,
@@ -114,7 +140,7 @@ class App extends Component {
     this.setState(initialState);
   }
 
-  handleNextCharChange = (event) => {
+  handleNextCharChange = (event: any) => {
     this.setState({
       nextChar: event.target.value
     });
@@ -137,8 +163,8 @@ class App extends Component {
     })
   }
 
-  handleChangeName = (index, newName) => {
-    this.setState((previousState) => {
+  handleChangeName = (index: number, newName: string) => {
+    this.setState((previousState: AppState) => {
       const newPlayerList = previousState.players;
       newPlayerList[index].name = newName;
       return {
@@ -147,8 +173,8 @@ class App extends Component {
     });
   }
 
-  handleChangePlayerType = (index, newType) => {
-    this.setState((previousState) => {
+  handleChangePlayerType = (index: number, newType: PlayerType) => {
+    this.setState((previousState: AppState) => {
       const players = previousState.players;
       players[index].type = newType;
       return {
@@ -157,13 +183,10 @@ class App extends Component {
     })
   }
 
-  handleChangeGameSetting = (settingName, value) => {
-    this.setState((previousState) => {
+  handleChangeGameSetting = (settingName: string, value: any) => {
+    this.setState((previousState: AppState) => {
       let newSettings = previousState.gameSettings;
-      const settingIndex = newSettings.findIndex((setting) => {
-        return setting.title === settingName;
-      });
-      newSettings[settingIndex].value = value;
+      newSettings.settingName.value = value;
       console.log(newSettings);
       return {
         gameSettings: newSettings
@@ -172,7 +195,7 @@ class App extends Component {
   }
 
   handleAddPlayer = () => {
-    this.setState((previousState) => {
+    this.setState((previousState: AppState) => {
       return {
         players: previousState.players.concat({
           name: 'New Player',
@@ -182,8 +205,8 @@ class App extends Component {
     })
   }
 
-  handleRemovePlayer = (index) => {
-    this.setState((previousState) => {
+  handleRemovePlayer = (index: number) => {
+    this.setState((previousState: AppState) => {
       const players = previousState.players;
       players.splice(index, 1);
       return {
@@ -193,7 +216,7 @@ class App extends Component {
   }
 
   handleSettingsClicked = () => {
-    this.setState((previousState) => {
+    this.setState((previousState: AppState) => {
       return {
         previousGameState: previousState.gameState,
         gameState: 'settings'
@@ -202,7 +225,7 @@ class App extends Component {
   }
 
   handleSettingsDoneClicked = () => {
-    this.setState((previousState) => {
+    this.setState((previousState: AppState) => {
       return {
         gameState: previousState.previousGameState,
         previousGameState: 'settings'
@@ -257,7 +280,7 @@ class App extends Component {
           getPreviousPlayer={this.getPreviousPlayer}
           commitNextChar={this.commitNextChar}
           possibleWordList={this.state.possibleWordList}
-          onCallBullshit={this.handleCallBullshit}/>;
+          onCallBullshit={this.handleCallBullshit} />;
         break;
       case 'gameOver':
         page =
@@ -267,7 +290,7 @@ class App extends Component {
             gameString={this.state.gameString}
             gameOverReason={this.state.gameOverReason}
             handleClick={this.resetGame}
-            possibleWordList={this.state.possibleWordList}/>
+            possibleWordList={this.state.possibleWordList} />
         break;
       case 'settings':
         page = <GameSettingsPage
