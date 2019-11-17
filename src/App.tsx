@@ -8,7 +8,6 @@ import { checkForWord, getPossibleWords } from './API'
 import {
   PlayerType,
   Player,
-  GameSetting,
   GameSettings
 } from './interfaces';
 
@@ -37,8 +36,7 @@ const initialState: AppState = {
   invalidPlayerNames: false,
   players: [
     { name: "Borg", type: "AI" },
-    { name: "Mike", type: "Human" },
-    { name: "Jane", type: "Human" }
+    { name: "Mike", type: "Human" }
   ],
   gameSettings: {
     minimumWordLength: {
@@ -273,14 +271,15 @@ class App extends React.Component<AppProps, AppState> {
         break;
       case 'playing':
         page = <Play
-          onNextCharChange={this.handleNextCharChange}
+          handleNextCharChange={this.handleNextCharChange}
           nextChar={this.state.nextChar}
           gameString={this.state.gameString}
           getCurrentPlayer={this.getCurrentPlayer}
           getPreviousPlayer={this.getPreviousPlayer}
           commitNextChar={this.commitNextChar}
           possibleWordList={this.state.possibleWordList}
-          onCallBullshit={this.handleCallBullshit} />;
+          handleCallBullshit={this.handleCallBullshit}
+        />;
         break;
       case 'gameOver':
         page =

@@ -1,30 +1,48 @@
-import React from 'react';
+import * as React from 'react';
+import { Player } from '../interfaces';
 
 const ENTER_KEY_CODE = 13;
 const initialState = {
   gameString: '',
   nextChar: ''
 }
-export class Play extends React.Component {
-  constructor(props) {
+
+export interface PlayState {
+  gameString: string;
+  nextChar: string;
+}
+
+export interface PlayProps {
+  handleNextCharChange(event: any): void;
+  nextChar: string;
+  gameString: string;
+  getCurrentPlayer(): Player;
+  getPreviousPlayer(): Player;
+  commitNextChar(): void;
+  possibleWordList: string[];
+  handleCallBullshit(): void;
+}
+
+export class Play extends React.Component<PlayProps, PlayState> {
+  constructor(props: PlayProps) {
     super(props);
     this.state = initialState;
   }
 
-  onKeyDown = (event) => {
+  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.keyCode === ENTER_KEY_CODE) {
       this.props.commitNextChar();
     }
   }
 
   render() {
-    const possibleWordList = this.props.possibleWordList.map((word) => {
+    const possibleWordList = this.props.possibleWordList.map((word: string) => {
       return <li key={word}>{word}</li>;
     });
 
     const bullshitButton = this.props.gameString.length > 0 &&
       <button
-        onClick={this.props.onCallBullshit}>
+        onClick={this.props.handleCallBullshit}>
         Call Bullshit on {this.props.getPreviousPlayer().name}
       </button>;
 
@@ -34,10 +52,10 @@ export class Play extends React.Component {
         <p>It is currently {this.props.getCurrentPlayer().name}'s turn</p>
         <p>Enter the next character:</p>
         <input
-          onChange={this.props.onNextCharChange}
+          onChange={this.props.handleNextCharChange}
           type='text'
           id='nextChar'
-          maxLength='1'
+          maxLength={1}
           onKeyDown={this.onKeyDown}
           value={this.props.nextChar}
         />
