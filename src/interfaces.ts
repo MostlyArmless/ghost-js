@@ -1,16 +1,22 @@
 export type PlayerType = "AI" | "Human";
 
-export interface Player {
+export interface Player
+{
     name: string;
     type: PlayerType;
 }
 
-export interface GameSetting {
+export interface SettingStruct
+{
     title: string;
+    settingKey: GameSettingKey;
     value: any;
     options: any[];
 }
 
-export interface GameSettings {
-    [key: string]: GameSetting
+export type GameSettingKey = 'minWordLength' | 'maxNumPlayers' | 'wordRecognitionMode';
+
+export interface GameSettings
+{
+    [key: string]: SettingStruct
 }

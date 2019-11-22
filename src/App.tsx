@@ -1,12 +1,12 @@
 import * as React from "react";
-import { checkForWord, getPossibleWords } from "./API";
+import { checkForWord, getPossibleWords, getBlacklist, getWhitelist } from "./API";
 import "./App.css";
 import { GameOver } from "./components/GameOver";
 import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { GameOverReason } from "./constants";
-import { GameSettings, Player, PlayerType } from "./interfaces";
+import { GameSettingKey, GameSettings, Player, PlayerType } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 
 interface AppProps { }
@@ -38,17 +38,20 @@ const initialState: AppState = {
     invalidPlayerNames: false,
     players: initialPlayers,
     gameSettings: {
-        minimumWordLength: {
+        minWordLength: {
+            settingKey: "minWordLength",
             title: "Minimum Word Length",
             value: 4,
             options: [3, 4, 5, 6]
         },
         maxNumPlayers: {
+            settingKey: "maxNumPlayers",
             title: "Maximum Number of Players",
             value: 4,
             options: [3, 4, 5]
         },
         wordRecognitionMode: {
+            settingKey: "wordRecognitionMode",
             title: "Word Recognition Mode",
             value: "auto",
             options: ["auto", "manual"]
@@ -70,6 +73,11 @@ class App extends React.Component<AppProps, AppState> {
         this.state = initialState;
     }
 
+    getGameSetting( settingName: GameSettingKey ): number | string
+    {
+        return this.state.gameSettings[settingName].value;
+    }
+
     gameOver( updatedGameString: string, gameOverReason: GameOverReason )
     {
         console.log( `Game over because ${gameOverReason}...` );
@@ -80,6 +88,11 @@ class App extends React.Component<AppProps, AppState> {
         } );
     }
 
+    savePossibleWordListToState = ( possibleWordList: string[] ) =>
+    {
+        this.setState( { possibleWordList: possibleWordList } );
+    }
+
     commitNextChar = async () =>
     {
         console.log( `committing next char '${this.state.nextChar}'...` );
@@ -88,17 +101,13 @@ class App extends React.Component<AppProps, AppState> {
         // Ask the server for a list of all words that start with the current game string
         if ( this.gameStringAboveMinLength( updatedGameString ) )
         {
-            const possibleWordList = await getPossibleWords( updatedGameString );
-            if ( possibleWordList.length == 1 )
+            const possibleWordList = await getPossibleWords( updatedGameString, this.savePossibleWordListToState );
+            if ( possibleWordList.length === 1 )
             {
                 this.gameOver( updatedGameString, GameOverReason.finishedWord );
                 return;
             }
-            else if ( possibleWordList.length > 1 )
-            {
-                this.setState( { possibleWordList: possibleWordList } );
-            }
-            else
+            else if ( possibleWordList.length === 0 )
             {
                 if ( this.state.gameSettings.wordRecognitionMode.value == "auto" )
                 {
@@ -111,9 +120,9 @@ class App extends React.Component<AppProps, AppState> {
         this.nextTurn( updatedGameString );
     };
 
-    aiPlaceLetterAndCommit = () =>
+    aiPlaceLetterAndCommit = async () =>
     {
-        this.setState( { nextChar: this.aiGetNextChar() } );
+        this.setState( { nextChar: await this.aiGetNextChar() } );
         this.commitNextChar();
     }
 
@@ -192,7 +201,7 @@ class App extends React.Component<AppProps, AppState> {
         } );
     };
 
-    handleChangeName = ( index: number, newName: string ) =>
+    handleRenamePlayer = ( index: number, newName: string ) =>
     {
         this.setState( ( previousState: AppState ) =>
         {
@@ -206,6 +215,15 @@ class App extends React.Component<AppProps, AppState> {
 
     handleChangePlayerType = ( index: number, newType: PlayerType ) =>
     {
+        const numPlayers: number = this.state.players.length;
+        const numAiPlayers: number = this.state.players.map( ( player ): number => { return player.type == 'AI' ? 1 : 0 } ).reduce( ( acc, curr ) => { return acc + curr; } );
+
+        if ( numAiPlayers === numPlayers - 1 && newType == 'AI' )
+        {
+            alert( 'Must have at least 1 Human player' );
+            return;
+        }
+
         this.setState( ( previousState: AppState ) =>
         {
             const players = previousState.players;
@@ -216,12 +234,12 @@ class App extends React.Component<AppProps, AppState> {
         } );
     };
 
-    handleChangeGameSetting = ( settingName: string, value: any ) =>
+    setGameSettings = ( settingName: GameSettingKey, value: number | string ) =>
     {
         this.setState( ( previousState: AppState ) =>
         {
             let newSettings = previousState.gameSettings;
-            newSettings.settingName.value = value;
+            newSettings[settingName].value = value;
             console.log( newSettings );
             return {
                 gameSettings: newSettings
@@ -231,6 +249,13 @@ class App extends React.Component<AppProps, AppState> {
 
     handleAddPlayer = () =>
     {
+        const maxPlayers = this.getGameSetting( 'maxNumPlayers' );
+        if ( this.state.players.length == maxPlayers )
+        {
+            alert( `You can't have more than ${maxPlayers} players` );
+            return;
+        }
+
         this.setState( ( previousState: AppState ) =>
         {
             return {
@@ -280,7 +305,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         try
         {
-            const possibleWordList = await getPossibleWords( this.state.gameString );
+            const possibleWordList = await getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
             if ( possibleWordList.length > 0 )
             {
                 this.setState( {
@@ -307,18 +332,30 @@ class App extends React.Component<AppProps, AppState> {
         }
     };
 
-    aiGetNextChar = () =>
+    aiGetNextChar = async () =>
     {
         // AI will choose the next letter based on the current string
-        console.log( "Taking AI turn..." );
+        console.log( `Taking AI turn, with current string = "${this.state.gameString}"...` );
         let nextLetter = "";
 
-        if ( this.state.possibleWordList.length > 0 )
+        const possibleWordList = await getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+
+        if ( possibleWordList.length > 0 )
         {
-            const targetWord = getRandomElementFromArray( this.state.possibleWordList ); // AI will choose a new target word every turn.
-            nextLetter = targetWord[this.state.gameString.length + 1];
-            console.log( `AI aiming for target word "${targetWord}. Submitting next letter '${nextLetter}'` );
-        } else
+            const targetWord = getRandomElementFromArray( possibleWordList ); // AI will choose a new target word every turn.
+            nextLetter = targetWord[this.state.gameString.length];
+            if ( nextLetter === undefined )
+            {
+                nextLetter = getRandomLetter();
+                console.log( `AI failed to choose a valid letter when aiming for target word "${targetWord}". overriding with random letter '${nextLetter}'` );
+            }
+            else
+            {
+                console.log( `AI aiming for target word "${targetWord}". Submitting next letter '${nextLetter}'` );
+            }
+
+        }
+        else
         {
             // AI realizes it can't do anything so it'll try to BS with a random letter
             nextLetter = getRandomLetter();
@@ -327,9 +364,9 @@ class App extends React.Component<AppProps, AppState> {
         return nextLetter;
     };
 
-    private gameStringAboveMinLength( updatedGameString: string )
+    private gameStringAboveMinLength( updatedGameString: string ): boolean
     {
-        return updatedGameString.length >= this.state.gameSettings.minimumWordLength.value - 1;
+        return updatedGameString.length > this.getGameSetting( 'minWordLength' );
     }
 
     render()
@@ -341,8 +378,8 @@ class App extends React.Component<AppProps, AppState> {
             case "newGame":
                 page = (
                     <NewGame
-                        list={ this.state.players }
-                        handleChangeName={ this.handleChangeName }
+                        playerList={ this.state.players }
+                        handleRenamePlayer={ this.handleRenamePlayer }
                         handleChangePlayerType={ this.handleChangePlayerType }
                         handleRemovePlayer={ this.handleRemovePlayer }
                         handleStartClicked={ this.handleStartClicked }
@@ -350,6 +387,8 @@ class App extends React.Component<AppProps, AppState> {
                         handleAddPlayer={ this.handleAddPlayer }
                         reset={ this.resetGame }
                         handleSettingsClicked={ this.handleSettingsClicked }
+                        getBlacklist={ getBlacklist }
+                        getWhitelist={ getWhitelist }
                     />
                 );
                 break;
@@ -365,6 +404,7 @@ class App extends React.Component<AppProps, AppState> {
                         possibleWordList={ this.state.possibleWordList }
                         handleCallBullshit={ this.handleCallBullshit }
                         aiPlaceLetterAndCommit={ this.aiPlaceLetterAndCommit }
+                        handleExitGame={ this.resetGame }
                     />
                 );
                 break;
@@ -384,7 +424,7 @@ class App extends React.Component<AppProps, AppState> {
                 page = (
                     <GameSettingsPage
                         gameSettings={ this.state.gameSettings }
-                        handleChangeGameSetting={ this.handleChangeGameSetting }
+                        handleChangeGameSetting={ this.setGameSettings }
                         handleSettingsDoneClicked={ this.handleSettingsDoneClicked }
                     />
                 );

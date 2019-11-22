@@ -38,7 +38,7 @@ export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
 
     private getRandomWaitTime(): number | undefined
     {
-        return Math.floor( Math.random() * Math.floor( 3000 ) );
+        return Math.floor( Math.random() * Math.floor( 1000 ) );
     }
 
     componentWillUnmount()

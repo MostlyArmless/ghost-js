@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { GameOverReason } from '../constants';
 import { Player } from '../interfaces';
+import { Button } from './Button';
 
 interface GameOverProps
 {
@@ -51,15 +52,28 @@ export function GameOver( props: GameOverProps )
       loserReason = <p>Game ended for unknown reason</p>
   }
 
+  const addToBlacklistButton = props.gameOverReason === GameOverReason.finishedWord &&
+    <Button
+      text={ `Remove ${props.gameString} from dictionary` }
+      onClick={ this.addToBlacklist( word ) } // TODO
+    />
+
+  const addToWhitelistButton = props.gameOverReason === GameOverReason.goodBullshitCall &&
+    <Button
+      text={ `Add ${props.gameString} to dictionary` }
+      onClick={ this.addToWhitelist( word ) } // TODO
+    />
+
   return (
     <div className='App'>
       <h1>GAME OVER</h1>
       { loserReason }
-      <input
-        type='button'
-        value='New Game'
+      <Button
+        text='New Game'
         onClick={ props.handleNewGame }
       />
+      { addToBlacklistButton }
+      { addToWhitelistButton }
     </div>
   );
 }

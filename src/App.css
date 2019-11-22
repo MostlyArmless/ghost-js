@@ -4,6 +4,12 @@ body {
 .App {
   text-align: center;
   color: red;
+  width: 600px;
+  margin-left: 25px;
+}
+
+.newGame {
+  text-align: left;
 }
 
 .center {
@@ -27,12 +33,13 @@ body {
 }
 
 button {
-  border-radius: 50%;
+  border-radius: 0%;
+  height: 40px;
+  width: 100px;
+  margin: 2px;
 }
 
 .startGame {
-  height: 25px;
-  width: 100px;
-  background-color: grey;
+  background-color: lightseagreen;
   color: black;
 }
