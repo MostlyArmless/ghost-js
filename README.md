@@ -31,5 +31,5 @@ May the best man never spell anything!
 
 8. Difficulty Modes: Implement multiple difficulty levels for AI players by defining different dictionary files containing simple VS rare words that they can draw from when playing, and making it so that the AI won't just randomly select a letter, but will always work towards building a possible word without actually completing it.
 
-#Developer Notes:
+# Developer Notes:
 Maybe I should add a PossibleWords property to GhostGame that contains a list of all possible words that could be constructed from the current string, and which updates every turn. This would be a good debugging tool, regardless. When there's lots of matches, it should display a sample 9 words: the 3 shortest words, 3 longest words, and 3 words from the middle of the list. Need to sort the list of candidate words by length and grab the first 3, last 3, and 3 from the middle with an even/odd length if statement.
