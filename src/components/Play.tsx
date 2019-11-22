@@ -16,7 +16,7 @@ export interface PlayState
 
 export interface PlayProps
 {
-  handleNextCharChange(event: any): void;
+  handleNextCharChange( event: any ): void;
   nextChar: string;
   gameString: string;
   getCurrentPlayer(): Player;
@@ -24,18 +24,19 @@ export interface PlayProps
   commitNextChar(): void;
   possibleWordList: string[];
   handleCallBullshit(): void;
+  aiPlaceLetterAndCommit(): void;
 }
 
 export class Play extends React.Component<PlayProps, PlayState> {
-  constructor(props: PlayProps)
+  constructor( props: PlayProps )
   {
-    super(props);
+    super( props );
     this.state = initialState;
   }
 
-  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) =>
+  onKeyDown = ( event: React.KeyboardEvent<HTMLInputElement> ) =>
   {
-    if (event.keyCode === ENTER_KEY_CODE)
+    if ( event.keyCode === ENTER_KEY_CODE )
     {
       this.props.commitNextChar();
     }
@@ -43,10 +44,10 @@ export class Play extends React.Component<PlayProps, PlayState> {
 
   render()
   {
-    const possibleWordList = this.props.possibleWordList.map((word: string) =>
+    const possibleWordList = this.props.possibleWordList.map( ( word: string ) =>
     {
       return <li key={ word }>{ word }</li>;
-    });
+    } );
 
     const bullshitButton = this.props.gameString.length > 0 &&
       <button
@@ -57,7 +58,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
     let spinner = this.props.getCurrentPlayer().type == 'AI' &&
       <Spinner
         loading={ this.props.getCurrentPlayer().type == 'AI' }
-        onLoadFinished={ this.props.commitNextChar } />;
+        onLoadFinished={ this.props.aiPlaceLetterAndCommit } />;
 
     return (
       <div>
@@ -68,6 +69,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
 
         <p>Enter the next character:</p>
         <input
+          autoComplete='off'
           onChange={ this.props.handleNextCharChange }
           type='text'
           id='nextChar'
@@ -77,6 +79,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
         />
         <p>Game String:</p>
         <input
+          autoComplete='off'
           value={ this.props.gameString }
           type='text'
           id='gameString'
