@@ -23,18 +23,20 @@ interface AppState
     currentPlayerIndex: number;
     gameOverReason: GameOverReason;
     possibleWordList: string[];
-    loser: any;
-    winner: any;
+    loser: Player;
+    winner: Player;
 }
+
+const initialPlayers: Player[] = [
+    { name: "Mike", type: "Human" },
+    { name: "Borg", type: "AI" }
+];
 
 const initialState: AppState = {
     gameState: "newGame",
     previousGameState: "newGame",
     invalidPlayerNames: false,
-    players: [
-        { name: "Mike", type: "Human" },
-        { name: "Borg", type: "AI" }
-    ],
+    players: initialPlayers,
     gameSettings: {
         minimumWordLength: {
             title: "Minimum Word Length",
@@ -57,8 +59,8 @@ const initialState: AppState = {
     currentPlayerIndex: 0,
     gameOverReason: GameOverReason.undefined,
     possibleWordList: [],
-    loser: {},
-    winner: {}
+    loser: initialPlayers[0],
+    winner: initialPlayers[1]
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -373,7 +375,7 @@ class App extends React.Component<AppProps, AppState> {
                         winningPlayer={ this.state.winner }
                         gameString={ this.state.gameString }
                         gameOverReason={ this.state.gameOverReason }
-                        handleClick={ this.resetGame }
+                        handleNewGame={ this.resetGame }
                         possibleWordList={ this.state.possibleWordList }
                     />
                 );
