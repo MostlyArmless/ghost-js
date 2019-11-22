@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { Player } from '../interfaces';
+import { Spinner } from './Spinner';
 
 const ENTER_KEY_CODE = 13;
-const initialState = {
+const initialState: PlayState = {
   gameString: '',
   nextChar: ''
 }
@@ -50,6 +51,11 @@ export class Play extends React.Component<PlayProps, PlayState> {
       <div>
         <h1>Ghost</h1>
         <p>It is currently {this.props.getCurrentPlayer().name}'s turn</p>
+
+        <Spinner
+          loading={this.props.getCurrentPlayer().type == 'AI'}
+          onLoadFinished={this.props.commitNextChar} />
+
         <p>Enter the next character:</p>
         <input
           onChange={this.props.handleNextCharChange}

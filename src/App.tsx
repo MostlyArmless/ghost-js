@@ -1,15 +1,13 @@
 import * as React from 'react';
+import { checkForWord, getPossibleWords } from './API';
 import './App.css';
-import { Play } from './components/Play';
 import { GameOver } from './components/GameOver';
-import { NewGame } from './components/NewGame';
 import { GameSettingsPage } from './components/GameSettingsPage';
-import { checkForWord, getPossibleWords } from './API'
-import {
-  PlayerType,
-  Player,
-  GameSettings
-} from './interfaces';
+import { NewGame } from './components/NewGame';
+import { Play } from './components/Play';
+import { GameOverReason } from './constants';
+import { GameSettings, Player, PlayerType } from './interfaces';
+import { getRandomLetter, getRandomElementFromArray } from './tools';
 
 interface AppProps {
 
@@ -24,7 +22,7 @@ interface AppState {
   nextChar: string;
   gameString: string;
   currentPlayerIndex: number;
-  gameOverReason: string;
+  gameOverReason: GameOverReason;
   possibleWordList: string[];
   loser: any;
   winner: any;
@@ -35,8 +33,8 @@ const initialState: AppState = {
   previousGameState: 'newGame',
   invalidPlayerNames: false,
   players: [
-    { name: "Borg", type: "AI" },
-    { name: "Mike", type: "Human" }
+    { name: "Mike", type: "Human" },
+    { name: "Borg", type: "AI" }
   ],
   gameSettings: {
     minimumWordLength: {
@@ -58,7 +56,7 @@ const initialState: AppState = {
   nextChar: '',
   gameString: '',
   currentPlayerIndex: 0,
-  gameOverReason: '',
+  gameOverReason: null,
   possibleWordList: [],
   loser: {},
   winner: {}
@@ -71,7 +69,7 @@ class App extends React.Component<AppProps, AppState> {
     this.state = initialState;
   }
 
-  gameOver(updatedGameString: string, gameOverReason: string) {
+  gameOver(updatedGameString: string, gameOverReason: GameOverReason) {
     console.log(`Game over because ${gameOverReason}...`);
     this.setState({
       gameState: 'gameOver',
@@ -113,11 +111,13 @@ class App extends React.Component<AppProps, AppState> {
   }
 
   nextTurn = (updatedGameString: string) => {
+    const nextChar = this.isNextPlayerAi() ? this.aiGetNextChar() : '';
+
     this.setState((previousState: AppState) => {
       const numPlayers = this.state.players.length;
       return ({
         currentPlayerIndex: (previousState.currentPlayerIndex + 1) % numPlayers,
-        nextChar: '',
+        nextChar: nextChar,
         gameString: updatedGameString
       });
     });
@@ -131,6 +131,17 @@ class App extends React.Component<AppProps, AppState> {
   getPreviousPlayer = () => {
     const previousPlayerIndex = this.state.currentPlayerIndex === 0 ? this.state.players.length - 1 : this.state.currentPlayerIndex - 1;
     return this.state.players[previousPlayerIndex];
+  }
+
+  getNextPlayer = () => {
+    console.log('Get next player...');
+    const nextPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
+    return this.state.players[nextPlayerIndex];
+  }
+
+  isNextPlayerAi = () => {
+    console.log('is next player ai?');
+    return this.getNextPlayer().type === 'AI';
   }
 
   resetGame = () => {
@@ -250,6 +261,22 @@ class App extends React.Component<AppProps, AppState> {
         winner: this.getCurrentPlayer()
       });
     }
+  }
+
+  aiGetNextChar = () => {
+    // AI will choose the next letter based on the current string
+    console.log("Taking AI turn...");
+    let nextLetter = '';
+
+    if (this.state.possibleWordList.length > 0) {
+      const targetWord = getRandomElementFromArray(this.state.possibleWordList); // AI will choose a new target word every turn.
+      nextLetter = targetWord[this.state.gameString.length];
+    }
+    else {
+      // AI realizes it can't do anything so it'll try to BS with a random letter
+      nextLetter = getRandomLetter();
+    }
+    return nextLetter;
   }
 
   render() {
