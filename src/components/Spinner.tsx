@@ -22,9 +22,9 @@ interface SpinnerState
 export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
 
     timerID: number;
-    constructor(props: SpinnerProps)
+    constructor( props: SpinnerProps )
     {
-        super(props);
+        super( props );
         this.timerID = 0;
     }
 
@@ -32,13 +32,18 @@ export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
     {
         this.timerID = window.setTimeout(
             () => this.props.onLoadFinished(),
-            3000
+            this.getRandomWaitTime()
         );
+    }
+
+    private getRandomWaitTime(): number | undefined
+    {
+        return Math.floor( Math.random() * Math.floor( 3000 ) );
     }
 
     componentWillUnmount()
     {
-        clearInterval(this.timerID);
+        clearInterval( this.timerID );
     }
 
     render()
