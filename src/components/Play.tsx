@@ -8,12 +8,14 @@ const initialState: PlayState = {
   nextChar: ''
 }
 
-export interface PlayState {
+export interface PlayState
+{
   gameString: string;
   nextChar: string;
 }
 
-export interface PlayProps {
+export interface PlayProps
+{
   handleNextCharChange(event: any): void;
   nextChar: string;
   gameString: string;
@@ -25,58 +27,66 @@ export interface PlayProps {
 }
 
 export class Play extends React.Component<PlayProps, PlayState> {
-  constructor(props: PlayProps) {
+  constructor(props: PlayProps)
+  {
     super(props);
     this.state = initialState;
   }
 
-  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.keyCode === ENTER_KEY_CODE) {
+  onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) =>
+  {
+    if (event.keyCode === ENTER_KEY_CODE)
+    {
       this.props.commitNextChar();
     }
   }
 
-  render() {
-    const possibleWordList = this.props.possibleWordList.map((word: string) => {
-      return <li key={word}>{word}</li>;
+  render()
+  {
+    const possibleWordList = this.props.possibleWordList.map((word: string) =>
+    {
+      return <li key={ word }>{ word }</li>;
     });
 
     const bullshitButton = this.props.gameString.length > 0 &&
       <button
-        onClick={this.props.handleCallBullshit}>
-        Call Bullshit on {this.props.getPreviousPlayer().name}
+        onClick={ this.props.handleCallBullshit }>
+        Call Bullshit on { this.props.getPreviousPlayer().name }
       </button>;
+
+    let spinner = this.props.getCurrentPlayer().type == 'AI' &&
+      <Spinner
+        loading={ this.props.getCurrentPlayer().type == 'AI' }
+        onLoadFinished={ this.props.commitNextChar } />;
 
     return (
       <div>
         <h1>Ghost</h1>
-        <p>It is currently {this.props.getCurrentPlayer().name}'s turn</p>
+        <p>It is currently { this.props.getCurrentPlayer().name }'s turn</p>
 
-        <Spinner
-          loading={this.props.getCurrentPlayer().type == 'AI'}
-          onLoadFinished={this.props.commitNextChar} />
+        { spinner }
 
         <p>Enter the next character:</p>
         <input
-          onChange={this.props.handleNextCharChange}
+          onChange={ this.props.handleNextCharChange }
           type='text'
           id='nextChar'
-          maxLength={1}
-          onKeyDown={this.onKeyDown}
-          value={this.props.nextChar}
+          maxLength={ 1 }
+          onKeyDown={ this.onKeyDown }
+          value={ this.props.nextChar }
         />
         <p>Game String:</p>
         <input
-          value={this.props.gameString}
+          value={ this.props.gameString }
           type='text'
           id='gameString'
-          readOnly={true}
+          readOnly={ true }
         />
-        {bullshitButton}
+        { bullshitButton }
         <div>
           Possible words:
           <ol>
-            {possibleWordList}
+            { possibleWordList }
           </ol>
         </div>
       </div>

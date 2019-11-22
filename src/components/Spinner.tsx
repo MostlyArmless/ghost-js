@@ -8,43 +8,49 @@ const override = `
     border-color: red;
 `;
 
-interface SpinnerProps {
+interface SpinnerProps
+{
     loading: boolean;
     onLoadFinished(): void;
 }
 
-interface SpinnerState {
+interface SpinnerState
+{
 
 }
 
 export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
 
     timerID: number;
-    constructor(props: SpinnerProps) {
+    constructor(props: SpinnerProps)
+    {
         super(props);
         this.timerID = 0;
     }
 
-    componentDidMount() {
+    componentDidMount()
+    {
         this.timerID = window.setTimeout(
             () => this.props.onLoadFinished(),
-            1000
+            3000
         );
     }
 
-    componentWillUnmount() {
+    componentWillUnmount()
+    {
         clearInterval(this.timerID);
     }
 
-    render() {
+    render()
+    {
         return (
             <div className='sweet-loading'>
                 <ClipLoader
-                    css={override}
-                    sizeUnit={"px"}
-                    size={150}
-                    color={'#123abc'}
-                    loading={this.props.loading}
+                    css={ override }
+                    sizeUnit={ "px" }
+                    size={ 150 }
+                    color={ '#123abc' }
+                    loading={ this.props.loading }
                 />
             </div>
         )
