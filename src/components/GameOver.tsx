@@ -73,24 +73,24 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
 
         const addToBlacklistButton = this.props.gameOverReason === GameOverReason.finishedWord &&
             <Button
-                text={ `Remove ${ this.props.gameString } from dictionary` }
+                text={ `Remove ${this.props.gameString} from dictionary` }
                 onClick={ this.addToBlacklist }
             />
 
         const addToWhitelistButton = this.props.gameOverReason === GameOverReason.goodBullshitCall &&
             <Button
-                text={ `Add ${ this.props.gameString } to dictionary` }
+                text={ `Add ${this.props.gameString} to dictionary` }
                 onClick={ this.addToWhitelist }
             />
 
         return (
             <div className='App'>
                 <h1>GAME OVER</h1>
-                { loserReason }
                 <Button
                     text='New Game'
                     onClick={ this.props.handleNewGame }
                 />
+                { loserReason }
                 { addToBlacklistButton }
                 { addToWhitelistButton }
             </div>
