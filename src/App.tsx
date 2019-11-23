@@ -1,5 +1,5 @@
 import * as React from "react";
-import { checkForWord, getPossibleWords, getBlacklist, getWhitelist } from "./API";
+import { API } from "./API";
 import "./App.css";
 import { GameOver } from "./components/GameOver";
 import { GameSettingsPage } from "./components/GameSettingsPage";
@@ -67,10 +67,13 @@ const initialState: AppState = {
 };
 
 class App extends React.Component<AppProps, AppState> {
+    API: API;
+
     constructor( props: AppProps )
     {
         super( props );
         this.state = initialState;
+        this.API = new API();
     }
 
     getGameSetting( settingName: GameSettingKey ): number | string
@@ -101,7 +104,7 @@ class App extends React.Component<AppProps, AppState> {
         // Ask the server for a list of all words that start with the current game string
         if ( this.gameStringAboveMinLength( updatedGameString ) )
         {
-            const possibleWordList = await getPossibleWords( updatedGameString, this.savePossibleWordListToState );
+            const possibleWordList = await this.API.getPossibleWords( updatedGameString, this.savePossibleWordListToState );
             if ( possibleWordList.length === 1 )
             {
                 this.gameOver( updatedGameString, GameOverReason.finishedWord );
@@ -305,7 +308,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         try
         {
-            const possibleWordList = await getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+            const possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
             if ( possibleWordList.length > 0 )
             {
                 this.setState( {
@@ -338,7 +341,7 @@ class App extends React.Component<AppProps, AppState> {
         console.log( `Taking AI turn, with current string = "${this.state.gameString}"...` );
         let nextLetter = "";
 
-        const possibleWordList = await getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+        const possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
 
         if ( possibleWordList.length > 0 )
         {
@@ -387,8 +390,8 @@ class App extends React.Component<AppProps, AppState> {
                         handleAddPlayer={ this.handleAddPlayer }
                         reset={ this.resetGame }
                         handleSettingsClicked={ this.handleSettingsClicked }
-                        getBlacklist={ getBlacklist }
-                        getWhitelist={ getWhitelist }
+                        getBlacklist={ this.API.getBlacklist }
+                        getWhitelist={ this.API.getWhitelist }
                     />
                 );
                 break;
@@ -417,6 +420,8 @@ class App extends React.Component<AppProps, AppState> {
                         gameOverReason={ this.state.gameOverReason }
                         handleNewGame={ this.resetGame }
                         possibleWordList={ this.state.possibleWordList }
+                        addToBlacklist={ this.API.blacklistWord }
+                        addToWhitelist={ this.API.whitelistWord }
                     />
                 );
                 break;

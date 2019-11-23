@@ -5,75 +5,96 @@ import { Button } from './Button';
 
 interface GameOverProps
 {
-  gameOverReason: GameOverReason;
-  losingPlayer: Player;
-  winningPlayer: Player;
-  gameString: string;
-  possibleWordList: string[];
-  handleNewGame(): void;
+    gameOverReason: GameOverReason;
+    losingPlayer: Player;
+    winningPlayer: Player;
+    gameString: string;
+    possibleWordList: string[];
+    handleNewGame(): void;
+    addToBlacklist( word: string ): void;
+    addToWhitelist( word: string ): void;
 }
 
-export function GameOver( props: GameOverProps )
+interface GameOverState
 {
-  let loserReason;
 
-  switch ( props.gameOverReason )
-  {
-    case GameOverReason.finishedWord:
-      loserReason = <p>{ props.losingPlayer.name } lost by spelling the word: "{ props.gameString }"</p>;
-      break;
+}
 
-    case GameOverReason.noPossibleWords:
-      loserReason = <p>{ props.losingPlayer.name } lost because no word starts with "{ props.gameString }"</p>;
-      break;
+export class GameOver extends React.Component<GameOverProps, GameOverState>
+{
+    addToBlacklist = () =>
+    {
+        this.props.addToBlacklist( this.props.gameString );
+    }
 
-    case GameOverReason.goodBullshitCall:
-      loserReason = <p>{ props.losingPlayer.name } lost because { props.winningPlayer.name } correctly called bullshit on them: There are no words that start with "{ props.gameString }"</p>;
-      break;
+    addToWhitelist = () =>
+    {
+        this.props.addToWhitelist( this.props.gameString );
+    }
 
-    case GameOverReason.badBullshitCall:
-      loserReason = (
-        <>
-          <p>{ props.losingPlayer.name } lost because they incorrectly called bullshit on { props.winningPlayer.name }.</p>
-          <br />
-          <p>Here are some words that start with { props.gameString }:</p>
-          <ol>
-            { props.possibleWordList.map( word =>
-            {
-              return <li key={ word }>{ word }</li>;
-            } ) }
-          </ol>
-        </>
-      );
-      break;
+    render()
+    {
+        let loserReason;
 
-    default:
-      console.log( props );
-      loserReason = <p>Game ended for unknown reason</p>
-  }
+        switch ( this.props.gameOverReason )
+        {
+            case GameOverReason.finishedWord:
+                loserReason = <p>{ this.props.losingPlayer.name } lost by spelling the word: "{ this.props.gameString }"</p>;
+                break;
 
-  const addToBlacklistButton = props.gameOverReason === GameOverReason.finishedWord &&
-    <Button
-      text={ `Remove ${props.gameString} from dictionary` }
-      onClick={ this.addToBlacklist( word ) } // TODO
-    />
+            case GameOverReason.noPossibleWords:
+                loserReason = <p>{ this.props.losingPlayer.name } lost because no word starts with "{ this.props.gameString }"</p>;
+                break;
 
-  const addToWhitelistButton = props.gameOverReason === GameOverReason.goodBullshitCall &&
-    <Button
-      text={ `Add ${props.gameString} to dictionary` }
-      onClick={ this.addToWhitelist( word ) } // TODO
-    />
+            case GameOverReason.goodBullshitCall:
+                loserReason = <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them: There are no words that start with "{ this.props.gameString }"</p>;
+                break;
 
-  return (
-    <div className='App'>
-      <h1>GAME OVER</h1>
-      { loserReason }
-      <Button
-        text='New Game'
-        onClick={ props.handleNewGame }
-      />
-      { addToBlacklistButton }
-      { addToWhitelistButton }
-    </div>
-  );
+            case GameOverReason.badBullshitCall:
+                loserReason = (
+                    <>
+                        <p>{ this.props.losingPlayer.name } lost because they incorrectly called bullshit on { this.props.winningPlayer.name }.</p>
+                        <br />
+                        <p>Here are some words that start with { this.props.gameString }:</p>
+                        <ol>
+                            { this.props.possibleWordList.map( word =>
+                            {
+                                return <li key={ word }>{ word }</li>;
+                            } ) }
+                        </ol>
+                    </>
+                );
+                break;
+
+            default:
+                console.log( this.props );
+                loserReason = <p>Game ended for unknown reason</p>
+        }
+
+        const addToBlacklistButton = this.props.gameOverReason === GameOverReason.finishedWord &&
+            <Button
+                text={ `Remove ${ this.props.gameString } from dictionary` }
+                onClick={ this.addToBlacklist }
+            />
+
+        const addToWhitelistButton = this.props.gameOverReason === GameOverReason.goodBullshitCall &&
+            <Button
+                text={ `Add ${ this.props.gameString } to dictionary` }
+                onClick={ this.addToWhitelist }
+            />
+
+        return (
+            <div className='App'>
+                <h1>GAME OVER</h1>
+                { loserReason }
+                <Button
+                    text='New Game'
+                    onClick={ this.props.handleNewGame }
+                />
+                { addToBlacklistButton }
+                { addToWhitelistButton }
+            </div>
+        );
+    }
+
 }
