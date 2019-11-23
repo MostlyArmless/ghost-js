@@ -55,6 +55,12 @@ const initialState: AppState = {
             title: "Word Recognition Mode",
             value: "auto",
             options: ["auto", "manual"]
+        },
+        wordListInGame: {
+            settingKey: 'wordListInGame',
+            title: "Show list of possible words in game",
+            value: false,
+            options: [true, false]
         }
     },
     nextChar: "",
@@ -76,9 +82,14 @@ class App extends React.Component<AppProps, AppState> {
         this.API = new API();
     }
 
-    getGameSetting( settingName: GameSettingKey ): number | string
+    getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
     {
-        return this.state.gameSettings[settingName].value;
+        return this.state.gameSettings[settingKey].options;
+    }
+
+    getGameSettingValue( settingKey: GameSettingKey ): number | string | boolean
+    {
+        return this.state.gameSettings[settingKey].value;
     }
 
     gameOver( updatedGameString: string, gameOverReason: GameOverReason )
@@ -98,7 +109,6 @@ class App extends React.Component<AppProps, AppState> {
 
     commitNextChar = async () =>
     {
-        console.log( `committing next char '${this.state.nextChar}'...` );
         const updatedGameString = this.state.gameString + this.state.nextChar;
 
         // Ask the server for a list of all words that start with the current game string
@@ -144,7 +154,6 @@ class App extends React.Component<AppProps, AppState> {
 
     getCurrentPlayer = () =>
     {
-        console.log( "Get current player..." );
         return this.state.players[this.state.currentPlayerIndex];
     };
 
@@ -186,16 +195,18 @@ class App extends React.Component<AppProps, AppState> {
 
     handleStartClicked = () =>
     {
+        let names = new Set();
         for ( let i = 0; i < this.state.players.length; i++ )
         {
             const name = this.state.players[i].name;
-            if ( name.length === 0 )
+            if ( name.length === 0 || names.has( name ) )
             {
                 this.setState( {
                     invalidPlayerNames: true
                 } );
                 return;
             }
+            names.add( name );
         }
 
         this.setState( {
@@ -237,8 +248,11 @@ class App extends React.Component<AppProps, AppState> {
         } );
     };
 
-    setGameSettings = ( settingName: GameSettingKey, value: number | string ) =>
+    setGameSettings = ( settingName: GameSettingKey, value: number | string | boolean ) =>
     {
+        if ( !this.getGameSettingValidOptions( settingName ).includes( value ) )
+            return;
+
         this.setState( ( previousState: AppState ) =>
         {
             let newSettings = previousState.gameSettings;
@@ -252,7 +266,7 @@ class App extends React.Component<AppProps, AppState> {
 
     handleAddPlayer = () =>
     {
-        const maxPlayers = this.getGameSetting( 'maxNumPlayers' );
+        const maxPlayers = this.getGameSettingValue( 'maxNumPlayers' );
         if ( this.state.players.length == maxPlayers )
         {
             alert( `You can't have more than ${maxPlayers} players` );
@@ -369,7 +383,7 @@ class App extends React.Component<AppProps, AppState> {
 
     private gameStringAboveMinLength( updatedGameString: string ): boolean
     {
-        return updatedGameString.length > this.getGameSetting( 'minWordLength' );
+        return updatedGameString.length > this.getGameSettingValue( 'minWordLength' );
     }
 
     render()
@@ -408,6 +422,7 @@ class App extends React.Component<AppProps, AppState> {
                         handleCallBullshit={ this.handleCallBullshit }
                         aiPlaceLetterAndCommit={ this.aiPlaceLetterAndCommit }
                         handleExitGame={ this.resetGame }
+                        displayWordList={ this.getGameSettingValue( "wordListInGame" ) as boolean }
                     />
                 );
                 break;
@@ -422,6 +437,7 @@ class App extends React.Component<AppProps, AppState> {
                         possibleWordList={ this.state.possibleWordList }
                         addToBlacklist={ this.API.blacklistWord }
                         addToWhitelist={ this.API.whitelistWord }
+                        isWordInDictionary={ this.API.checkForWord }
                     />
                 );
                 break;

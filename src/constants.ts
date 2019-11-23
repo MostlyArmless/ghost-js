@@ -1,4 +1,3 @@
-// TODO - replace union type with enum
 export enum GameOverReason
 {
     undefined,
@@ -13,3 +12,5 @@ export enum WordRecognitionMode
     AutoCallBullshit,
     ManualCallBullshit
 }
+
+export const ENTER_KEY_CODE = 13;

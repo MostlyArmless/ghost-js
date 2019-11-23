@@ -3,8 +3,8 @@ import { Player } from '../interfaces';
 import { Spinner } from './Spinner';
 import { Button } from './Button'
 import * as _ from 'underscore';
+import { ENTER_KEY_CODE } from '../constants';
 
-const ENTER_KEY_CODE = 13;
 const initialState: PlayState = {
     gameString: '',
     nextChar: ''
@@ -28,6 +28,7 @@ export interface PlayProps
     handleCallBullshit(): void;
     aiPlaceLetterAndCommit(): void;
     handleExitGame(): void;
+    displayWordList: boolean;
 }
 
 export class Play extends React.Component<PlayProps, PlayState> {
@@ -47,17 +48,13 @@ export class Play extends React.Component<PlayProps, PlayState> {
 
     render()
     {
-        const randomSubsetOfPossibleWords: string[] = _.sample( this.props.possibleWordList, 20 );
-        const possibleWordListForDisplay = randomSubsetOfPossibleWords.map( ( word: string ) =>
-        {
-            return <li key={ word }>{ word }</li>;
-        } );
+        const possibleWordListForDisplay = this.props.displayWordList && this.buildPossibleWordList();
 
         const bullshitButton = this.props.gameString.length > 0 &&
-            <button
-                onClick={ this.props.handleCallBullshit }>
-                Call Bullshit on { this.props.getPreviousPlayer().name }
-            </button>;
+            <Button
+                onClick={ this.props.handleCallBullshit }
+                text={ `Call Bullshit on ${this.props.getPreviousPlayer().name}` }
+            />;
 
         let spinner = this.props.getCurrentPlayer().type == 'AI' &&
             <Spinner
@@ -95,13 +92,24 @@ export class Play extends React.Component<PlayProps, PlayState> {
                     readOnly={ true }
                 />
                 { bullshitButton }
-                <div>
-                    Random sample of possible words:
-                    <ol>
-                        { possibleWordListForDisplay }
-                    </ol>
-                </div>
+                { possibleWordListForDisplay }
             </>
         );
+    }
+
+    private buildPossibleWordList()
+    {
+        const randomSubsetOfPossibleWords: string[] = _.sample( this.props.possibleWordList, 20 );
+        const listItems = randomSubsetOfPossibleWords.map( ( word: string ) =>
+        {
+            return <li key={ word }>{ word }</li>;
+        } );
+
+        return (
+            <>
+                Random sample of possible words:
+            <ol>{ listItems }</ol>
+            </>
+        )
     }
 }

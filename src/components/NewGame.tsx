@@ -85,7 +85,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
     {
         return (
             <>
-                <p>Blacklisted words:</p>
+                <h2>Blacklisted words:</h2>
                 <ol>
                     { this.state.blacklist.map( ( word: string ) => { return ( <li key={ word }>{ word }</li> ); } ) }
                 </ol>
@@ -97,7 +97,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
     {
         return (
             <>
-                <p>Whitelisted words:</p>
+                <h2>Whitelisted words:</h2>
                 <ol>
                     { this.state.whitelist.map( ( word: string ) => { return <li key={ word }>{ word }</li>; } ) }
                 </ol>
@@ -107,7 +107,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
     render()
     {
-        const invalidPlayerWarning = <h2>Player names can't be blank</h2>
+        const invalidPlayerWarning = this.props.invalidPlayerNames && <h2>Player names must be unique and non-blank</h2>
 
         const playerList = this.buildPlayerList();
         const blacklist = this.state.blacklistVisible && this.buildBlacklist();
@@ -116,7 +116,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
         return (
             <div className='newGame'>
                 <h1>Choose Players</h1>
-                { this.props.invalidPlayerNames && invalidPlayerWarning }
+                { invalidPlayerWarning }
                 <Button
                     onClick={ this.props.reset }
                     text='Reset Game'

@@ -14,7 +14,7 @@ export interface SettingStruct
     options: any[];
 }
 
-export type GameSettingKey = 'minWordLength' | 'maxNumPlayers' | 'wordRecognitionMode';
+export type GameSettingKey = 'minWordLength' | 'maxNumPlayers' | 'wordRecognitionMode' | 'wordListInGame';
 
 export interface GameSettings
 {
