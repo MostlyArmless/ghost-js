@@ -1,4 +1,4 @@
-const serverUrl = "https://ghost-word-server.herokuapp.com/";
+const serverUrl = "https://ghost-word-server.herokuapp.com";
 
 export class API
 {
