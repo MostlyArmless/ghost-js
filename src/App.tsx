@@ -6,15 +6,16 @@ import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { GameOverReason } from "./constants";
-import { GameSettingKey, GameSettings, Player, PlayerType } from "./interfaces";
+import { GameSettingKey, GameSettings, Player, PlayerType, AppPage } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
+import { HelpPage } from "./components/HelpPage";
 
 interface AppProps { }
 
 interface AppState
 {
-    gameState: string;
-    previousGameState: string;
+    currentPage: AppPage;
+    previousPage: AppPage;
     invalidPlayerNames: boolean;
     players: Player[];
     gameSettings: GameSettings;
@@ -33,8 +34,8 @@ const initialPlayers: Player[] = [
 ];
 
 const initialState: AppState = {
-    gameState: "newGame",
-    previousGameState: "newGame",
+    currentPage: "NewGame",
+    previousPage: "NewGame",
     invalidPlayerNames: false,
     players: initialPlayers,
     gameSettings: {
@@ -96,7 +97,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         console.log( `Game over because ${gameOverReason}...` );
         this.setState( {
-            gameState: "gameOver",
+            currentPage: "GameOver",
             gameString: updatedGameString,
             gameOverReason: gameOverReason
         } );
@@ -211,7 +212,7 @@ class App extends React.Component<AppProps, AppState> {
 
         this.setState( {
             invalidPlayerNames: false,
-            gameState: "playing"
+            currentPage: "Play"
         } );
     };
 
@@ -301,8 +302,8 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( ( previousState: AppState ) =>
         {
             return {
-                previousGameState: previousState.gameState,
-                gameState: "settings"
+                previousPage: previousState.currentPage,
+                currentPage: "Settings"
             };
         } );
     };
@@ -312,8 +313,8 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( ( previousState: AppState ) =>
         {
             return {
-                gameState: previousState.previousGameState,
-                previousGameState: "settings"
+                currentPage: previousState.previousPage,
+                previousPage: "Settings"
             };
         } );
     };
@@ -326,7 +327,7 @@ class App extends React.Component<AppProps, AppState> {
             if ( possibleWordList.length > 0 )
             {
                 this.setState( {
-                    gameState: "gameOver",
+                    currentPage: "GameOver",
                     gameOverReason: GameOverReason.badBullshitCall,
                     loser: this.getCurrentPlayer(),
                     winner: this.getPreviousPlayer(),
@@ -336,7 +337,7 @@ class App extends React.Component<AppProps, AppState> {
             else
             {
                 this.setState( {
-                    gameState: "gameOver",
+                    currentPage: "GameOver",
                     gameOverReason: GameOverReason.goodBullshitCall,
                     loser: this.getPreviousPlayer(),
                     winner: this.getCurrentPlayer()
@@ -386,13 +387,31 @@ class App extends React.Component<AppProps, AppState> {
         return updatedGameString.length > this.getGameSettingValue( 'minWordLength' );
     }
 
+    handleHelp = () =>
+    {
+        this.setState( { currentPage: 'Help' } );
+    }
+
+    handleBack = () =>
+    {
+        this.setState( previousState =>
+        {
+
+            return {
+                currentPage: previousState.previousPage,
+                previousPage: "NewGame" // TODO - implement a stack so we can have indefinite Back depth
+            };
+
+        } )
+    }
+
     render()
     {
         let page = <h1>Ghost Game</h1>;
 
-        switch ( this.state.gameState )
+        switch ( this.state.currentPage )
         {
-            case "newGame":
+            case "NewGame":
                 page = (
                     <NewGame
                         playerList={ this.state.players }
@@ -406,10 +425,12 @@ class App extends React.Component<AppProps, AppState> {
                         handleSettingsClicked={ this.handleSettingsClicked }
                         getBlacklist={ this.API.getBlacklist }
                         getWhitelist={ this.API.getWhitelist }
+                        handleHelp={ this.handleHelp }
                     />
                 );
                 break;
-            case "playing":
+
+            case "Play":
                 page = (
                     <Play
                         handleNextCharChange={ this.handleNextCharChange }
@@ -426,7 +447,8 @@ class App extends React.Component<AppProps, AppState> {
                     />
                 );
                 break;
-            case "gameOver":
+
+            case "GameOver":
                 page = (
                     <GameOver
                         losingPlayer={ this.state.loser }
@@ -441,7 +463,8 @@ class App extends React.Component<AppProps, AppState> {
                     />
                 );
                 break;
-            case "settings":
+
+            case "Settings":
                 page = (
                     <GameSettingsPage
                         gameSettings={ this.state.gameSettings }
@@ -450,11 +473,23 @@ class App extends React.Component<AppProps, AppState> {
                     />
                 );
                 break;
+
+            case "Help":
+                page = ( <HelpPage
+                    handleBack={ this.handleBack }
+                /> );
+                break;
+
             default:
                 page = <p>Invalid gameState.</p>;
         }
 
-        return <div className="App">{ page }</div>;
+        return (
+            <div className="App">
+                <h1>👻</h1>
+                { page }
+            </div>
+        );
     }
 }
 

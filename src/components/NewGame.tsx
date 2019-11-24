@@ -17,6 +17,7 @@ interface NewGameProps
     invalidPlayerNames: boolean;
     getBlacklist(): Promise<string[]>;
     getWhitelist(): Promise<string[]>;
+    handleHelp(): void;
 }
 
 interface NewGameState
@@ -75,7 +76,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
                 <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ this.props.handleChangePlayerType } />
 
-                { id > 0 &&
+                { id > 1 &&
                     <Button key={ id + '_button' } id={ id } onClick={ this.props.handleRemovePlayer } text='Delete' /> }
             </div> );
         } );
@@ -115,7 +116,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
         return (
             <div className='newGame'>
-                <h1>Choose Players</h1>
+                <h2>New Game</h2>
                 { invalidPlayerWarning }
                 <Button
                     onClick={ this.props.reset }
@@ -131,12 +132,8 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
                     text='Settings'
                 />
                 <Button
-                    onClick={ this.toggleBlacklistVisibility }
-                    text={ this.state.blacklistVisible ? 'Hide Blacklist' : 'Show Blacklist' }
-                />
-                <Button
-                    onClick={ this.toggleWhitelistVisibility }
-                    text={ this.state.whitelistVisible ? 'Hide Whitelist' : 'Show Whitelist' }
+                    onClick={ this.props.handleHelp }
+                    text="Help"
                 />
                 <fieldset>
                     { playerList }
@@ -145,6 +142,15 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
                         text='Add Player'
                     />
                 </fieldset>
+                
+                <Button
+                    onClick={ this.toggleBlacklistVisibility }
+                    text={ this.state.blacklistVisible ? 'Hide Blacklist' : 'Show Blacklist' }
+                />
+                <Button
+                    onClick={ this.toggleWhitelistVisibility }
+                    text={ this.state.whitelistVisible ? 'Hide Whitelist' : 'Show Whitelist' }
+                />
                 { blacklist }
                 { whitelist }
             </div>
