@@ -18,7 +18,6 @@ export class GameSettingsPage extends React.Component<GameSettingsPageProps, Gam
 
   render()
   {
-
     let settings: any[] = [];
 
     for ( let settingKey in this.props.gameSettings )
@@ -39,14 +38,15 @@ export class GameSettingsPage extends React.Component<GameSettingsPageProps, Gam
     }
 
     return (
-      <div>
+      <>
+        <h2>Game Settings</h2>
         <table className='center'>
           <tbody>
             { settings }
           </tbody>
         </table>
         <button onClick={ this.props.handleSettingsDoneClicked }>Done</button>
-      </div>
+      </>
     );
   }
 }
