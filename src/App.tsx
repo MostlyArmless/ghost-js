@@ -34,7 +34,7 @@ interface AppState
 
 const initialPlayers: Player[] = [
     { name: "Mike", type: "Human" },
-    { name: "SPAGBOL", type: "Human" }
+    { name: "Borg", type: "AI" }
 ];
 
 const initialState: AppState = {
