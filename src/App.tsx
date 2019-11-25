@@ -26,6 +26,7 @@ interface AppState
     possibleWordList: string[];
     loser: Player;
     winner: Player;
+    waitingForAiToChooseLetter: boolean;
 }
 
 const initialPlayers: Player[] = [
@@ -60,8 +61,8 @@ const initialState: AppState = {
         wordListInGame: {
             settingKey: 'wordListInGame',
             title: "Show list of possible words in game",
-            value: false,
-            options: [true, false]
+            value: 'Hide',
+            options: ['Show', 'Hide']
         }
     },
     nextChar: "",
@@ -70,7 +71,8 @@ const initialState: AppState = {
     gameOverReason: GameOverReason.undefined,
     possibleWordList: [],
     loser: initialPlayers[0],
-    winner: initialPlayers[1]
+    winner: initialPlayers[1],
+    waitingForAiToChooseLetter: false
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -93,13 +95,14 @@ class App extends React.Component<AppProps, AppState> {
         return this.state.gameSettings[settingKey].value;
     }
 
-    gameOver( updatedGameString: string, gameOverReason: GameOverReason )
+    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: Player )
     {
         console.log( `Game over because ${gameOverReason}...` );
         this.setState( {
             currentPage: "GameOver",
             gameString: updatedGameString,
-            gameOverReason: gameOverReason
+            gameOverReason: gameOverReason,
+            loser: loser
         } );
     }
 
@@ -116,16 +119,16 @@ class App extends React.Component<AppProps, AppState> {
         if ( this.gameStringAboveMinLength( updatedGameString ) )
         {
             const possibleWordList = await this.API.getPossibleWords( updatedGameString, this.savePossibleWordListToState );
-            if ( possibleWordList.length === 1 )
+            if ( possibleWordList.length === 1 && possibleWordList[0] === updatedGameString )
             {
-                this.gameOver( updatedGameString, GameOverReason.finishedWord );
+                this.gameOver( updatedGameString, GameOverReason.finishedWord, this.getCurrentPlayer() );
                 return;
             }
             else if ( possibleWordList.length === 0 )
             {
                 if ( this.state.gameSettings.wordRecognitionMode.value == "auto" )
                 {
-                    this.gameOver( updatedGameString, GameOverReason.noPossibleWords );
+                    this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
                     return;
                 }
             }
@@ -136,8 +139,18 @@ class App extends React.Component<AppProps, AppState> {
 
     aiPlaceLetterAndCommit = async () =>
     {
-        this.setState( { nextChar: await this.aiGetNextChar() } );
-        this.commitNextChar();
+        this.setState( { waitingForAiToChooseLetter: true } );
+        const nextChar = await this.aiGetNextChar();
+
+        this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
+    }
+
+    takeAiTurnIfNeeded = () =>
+    {
+        if ( this.getCurrentPlayer().type === 'AI' )
+        {
+            this.aiPlaceLetterAndCommit();
+        }
     }
 
     nextTurn = ( updatedGameString: string ) =>
@@ -150,7 +163,7 @@ class App extends React.Component<AppProps, AppState> {
                 nextChar: '',
                 gameString: updatedGameString
             };
-        } );
+        }, this.takeAiTurnIfNeeded );
     };
 
     getCurrentPlayer = () =>
@@ -249,10 +262,29 @@ class App extends React.Component<AppProps, AppState> {
         } );
     };
 
-    setGameSettings = ( settingName: GameSettingKey, value: number | string | boolean ) =>
+    setGameSetting = ( settingName: GameSettingKey, value: number | string | boolean ) =>
     {
-        if ( !this.getGameSettingValidOptions( settingName ).includes( value ) )
+        const validSettings = this.getGameSettingValidOptions( settingName );
+        console.log( typeof ( value ) );
+        console.log( typeof ( validSettings[0] ) );
+
+        switch ( typeof ( validSettings[0] ) )
+        {
+            case "number":
+                value = parseInt( value as string );
+                break;
+            case "string":
+                value = value.toString();
+                break;
+            default:
+                console.error( "INVALID INPUT TYPE" );
+        }
+
+        if ( !validSettings.includes( value ) )
+        {
+            console.warn( `Attempted to set setting "${settingName}" to invalid value "${value}". Valid settings would have been: ${validSettings}` )
             return;
+        }
 
         this.setState( ( previousState: AppState ) =>
         {
@@ -356,7 +388,11 @@ class App extends React.Component<AppProps, AppState> {
         console.log( `Taking AI turn, with current string = "${this.state.gameString}"...` );
         let nextLetter = "";
 
-        const possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+        let possibleWordList: string[] = [];
+        if ( this.state.gameString.length > 0 )
+        {
+            possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+        }
 
         if ( possibleWordList.length > 0 )
         {
@@ -371,7 +407,6 @@ class App extends React.Component<AppProps, AppState> {
             {
                 console.log( `AI aiming for target word "${targetWord}". Submitting next letter '${nextLetter}'` );
             }
-
         }
         else
         {
@@ -379,6 +414,7 @@ class App extends React.Component<AppProps, AppState> {
             nextLetter = getRandomLetter();
             console.log( `AI can't think of any words, bullshitting with letter '${nextLetter}'` );
         }
+
         return nextLetter;
     };
 
@@ -441,9 +477,9 @@ class App extends React.Component<AppProps, AppState> {
                         commitNextChar={ this.commitNextChar }
                         possibleWordList={ this.state.possibleWordList }
                         handleCallBullshit={ this.handleCallBullshit }
-                        aiPlaceLetterAndCommit={ this.aiPlaceLetterAndCommit }
                         handleExitGame={ this.resetGame }
                         displayWordList={ this.getGameSettingValue( "wordListInGame" ) as boolean }
+                        waitingForAiToChooseLetter={ this.state.waitingForAiToChooseLetter }
                     />
                 );
                 break;
@@ -468,7 +504,7 @@ class App extends React.Component<AppProps, AppState> {
                 page = (
                     <GameSettingsPage
                         gameSettings={ this.state.gameSettings }
-                        handleChangeGameSetting={ this.setGameSettings }
+                        handleChangeGameSetting={ this.setGameSetting }
                         handleSettingsDoneClicked={ this.handleSettingsDoneClicked }
                     />
                 );

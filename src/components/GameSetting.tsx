@@ -6,7 +6,7 @@ interface GameSettingProps
     settingKey: GameSettingKey;
     settingTitle: string;
     value: number | string;
-    options: any[];
+    options: ( number | string )[];
     handleChangeGameSetting( settingName: GameSettingKey, newValue: number | string ): void;
 }
 

@@ -11,7 +11,6 @@ const override = `
 interface SpinnerProps
 {
     loading: boolean;
-    onLoadFinished(): void;
 }
 
 interface SpinnerState
@@ -26,19 +25,6 @@ export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
     {
         super( props );
         this.timerID = 0;
-    }
-
-    componentDidMount()
-    {
-        this.timerID = window.setTimeout(
-            () => this.props.onLoadFinished(),
-            this.getRandomWaitTime()
-        );
-    }
-
-    private getRandomWaitTime(): number | undefined
-    {
-        return Math.floor( Math.random() * Math.floor( 1000 ) );
     }
 
     componentWillUnmount()

@@ -2,9 +2,9 @@ import * as React from 'react';
 
 interface ButtonProps
 {
-  id?: number;
+  id?: string | number;
   className?: string;
-  onClick( id?: number ): void
+  onClick( id?: number | string ): void
   text: string;
 }
 

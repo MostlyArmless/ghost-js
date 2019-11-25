@@ -6,14 +6,10 @@ import * as _ from 'underscore';
 import { ENTER_KEY_CODE } from '../constants';
 
 const initialState: PlayState = {
-    gameString: '',
-    nextChar: ''
 }
 
 export interface PlayState
 {
-    gameString: string;
-    nextChar: string;
 }
 
 export interface PlayProps
@@ -26,9 +22,9 @@ export interface PlayProps
     commitNextChar(): void;
     possibleWordList: string[];
     handleCallBullshit(): void;
-    aiPlaceLetterAndCommit(): void;
     handleExitGame(): void;
     displayWordList: boolean;
+    waitingForAiToChooseLetter: boolean;
 }
 
 export class Play extends React.Component<PlayProps, PlayState> {
@@ -42,6 +38,11 @@ export class Play extends React.Component<PlayProps, PlayState> {
     {
         if ( event.keyCode === ENTER_KEY_CODE )
         {
+            if ( this.props.nextChar.length === 0 )
+            {
+                alert( "Can't submit a blank" );
+                return;
+            }
             this.props.commitNextChar();
         }
     }
@@ -56,11 +57,6 @@ export class Play extends React.Component<PlayProps, PlayState> {
                 text={ `Call Bullshit on ${this.props.getPreviousPlayer().name}` }
             />;
 
-        let spinner = this.props.getCurrentPlayer().type == 'AI' &&
-            <Spinner
-                loading={ this.props.getCurrentPlayer().type == 'AI' }
-                onLoadFinished={ this.props.aiPlaceLetterAndCommit } />;
-
         return (
             <>
                 <h1>Ghost</h1>
@@ -71,7 +67,9 @@ export class Play extends React.Component<PlayProps, PlayState> {
                 />
                 <p>It is currently { this.props.getCurrentPlayer().name }'s turn</p>
 
-                { spinner }
+                <Spinner
+                    loading={ this.props.waitingForAiToChooseLetter }
+                />
 
                 <p>Enter the next character:</p>
                 <input
@@ -107,6 +105,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
 
         return (
             <>
+                <br />
                 Random sample of possible words:
             <ol>{ listItems }</ol>
             </>

@@ -3,6 +3,7 @@ import { GameOverReason, ENTER_KEY_CODE } from '../constants';
 import { Player } from '../interfaces';
 import { Button } from './Button';
 import { RemovableWord } from './RemovableWord';
+import { TextboxAndButton } from './TextboxAndButton';
 
 interface GameOverProps
 {
@@ -19,11 +20,12 @@ interface GameOverProps
 
 interface GameOverState
 {
-    wordToWhitelist: string;
+
 }
 
-const initialState: GameOverState = {
-    wordToWhitelist: ''
+const initialState: GameOverState =
+{
+
 }
 
 export class GameOver extends React.Component<GameOverProps, GameOverState>
@@ -32,6 +34,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
     {
         super( props );
         this.state = initialState;
+        console.log( `GAME OVER PROPS: ${props}` );
     }
 
     addToBlacklist = () =>
@@ -49,23 +52,21 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
         this.setState( { wordToWhitelist: event.target.value } );
     }
 
-    onKeyDown = async ( event: React.KeyboardEvent<HTMLInputElement> ) =>
+    submitWordToWhitelist = async ( word: string ) =>
     {
-        if ( event.keyCode === ENTER_KEY_CODE )
+        if ( word.length === 0 )
         {
-            if ( this.state.wordToWhitelist.length === 0 )
-            {
-                alert( "Can't add blank word to dictionary" );
-                return;
-            }
-            if ( await this.props.isWordInDictionary( this.state.wordToWhitelist, 50 ) )
-            {
-                alert( "This word is already in the dictionary!" );
-                return;
-            }
-
-            this.props.addToWhitelist( this.state.wordToWhitelist );
+            alert( "Can't add blank word to dictionary" );
+            return;
         }
+        if ( await this.props.isWordInDictionary( word, 50 ) )
+        {
+            alert( "This word is already in the dictionary!" );
+            return;
+        }
+
+        this.props.addToWhitelist( word );
+        alert( `Added "${word}" to dictionary for future games` );
     }
 
     render()
@@ -74,11 +75,15 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
 
         const addToBlacklistButton = this.props.gameOverReason === GameOverReason.finishedWord &&
             <Button
-                text={ `Remove ${this.props.gameString} from dictionary` }
+                text={ `Remove word from dictionary` }
                 onClick={ this.addToBlacklist }
             />
 
-        const addToWhitelistTextbox = this.props.gameOverReason === GameOverReason.goodBullshitCall && this.buildWhitelistTextbox();
+        const addToWhitelistTextbox = this.props.gameOverReason === GameOverReason.goodBullshitCall &&
+            <TextboxAndButton
+                onSubmit={ this.submitWordToWhitelist }
+                buttonText="Add to Dictionary"
+            />
 
         return (
             <div className='App'>
@@ -94,20 +99,6 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
         );
     }
 
-
-    private buildWhitelistTextbox()
-    {
-        return ( <input
-            autoComplete='off'
-            onChange={ this.handleWhitelistTextChange }
-            type='text'
-            id='addToWhitelist'
-            maxLength={ 50 }
-            onKeyDown={ this.onKeyDown }
-            value={ this.state.wordToWhitelist }
-        /> );
-    }
-
     private buildLoserReason()
     {
         switch ( this.props.gameOverReason )
@@ -119,7 +110,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
                 return <p>{ this.props.losingPlayer.name } lost because no word starts with "{ this.props.gameString }"</p>;
 
             case GameOverReason.goodBullshitCall:
-                return <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them: There are no words that start with "{ this.props.gameString }"</p>;
+                return <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them<br />There are no words that start with "{ this.props.gameString }"</p>;
 
             case GameOverReason.badBullshitCall:
                 return ( <>
