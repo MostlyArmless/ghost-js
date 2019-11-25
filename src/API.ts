@@ -14,7 +14,6 @@ export class API
         {
             // Wait up to 10 seconds for the Heroku-hosted ghost-word-server to respond.
             const response = await timeoutPromise( 10000, window.fetch( `${serverUrl}/` ) ) as Response;
-            console.log( response );
 
             const res = await response.json();
             return res === "Server online";
