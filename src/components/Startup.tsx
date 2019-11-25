@@ -29,7 +29,6 @@ export class Startup extends React.Component<StartupProps, StartupState>
 
     async componentDidMount()
     {
-        console.log( `Startup mounted` );
         this.setState( { serverIsLoaded: false }, this.pingServer );
     }
 
@@ -50,11 +49,6 @@ export class Startup extends React.Component<StartupProps, StartupState>
                 serverCannotBeReached: true
             } );
         }
-    }
-
-    componentDidUpdate()
-    {
-        console.log( this.state );
     }
 
     render()
