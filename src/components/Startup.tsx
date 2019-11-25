@@ -66,7 +66,7 @@ export class Startup extends React.Component<StartupProps, StartupState>
         }
         else
         {
-            message = <p>Waiting for sever to come online...</p>;
+            message = <p>Waiting for Heroku server to come online...</p>;
         }
 
         return (
