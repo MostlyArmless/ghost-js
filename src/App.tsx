@@ -10,6 +10,7 @@ import { GameSettingKey, GameSettings, Player, PlayerType, AppPage } from "./int
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
+import { Startup } from "./components/Startup";
 
 interface AppProps { }
 
@@ -37,8 +38,8 @@ const initialPlayers: Player[] = [
 ];
 
 const initialState: AppState = {
-    currentPage: "NewGame",
-    previousPage: "NewGame",
+    currentPage: "Startup",
+    previousPage: "Startup",
     invalidPlayerNames: false,
     players: initialPlayers,
     gameSettings: {
@@ -207,6 +208,13 @@ class App extends React.Component<AppProps, AppState> {
         console.log( "Resetting game..." );
         this.setState( initialState );
     };
+
+    handleNewGame = () =>
+    {
+        let newGameState = initialState;
+        newGameState.currentPage = 'NewGame';
+        this.setState( newGameState );
+    }
 
     handleNextCharChange = ( event: any ) =>
     {
@@ -490,6 +498,15 @@ class App extends React.Component<AppProps, AppState> {
 
         switch ( this.state.currentPage )
         {
+            case "Startup":
+                page = (
+                    <Startup
+                        waitForServerToComeOnline={ this.API.pingServer }
+                        handleNewGame={ this.handleNewGame }
+                    />
+                );
+                break;
+
             case "NewGame":
                 page = (
                     <NewGame

@@ -55,6 +55,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
             <Button
                 onClick={ this.props.handleCallBullshit }
                 text={ `Call Bullshit on ${this.props.getPreviousPlayer().name}` }
+                className="wideButton"
             />;
 
         return (

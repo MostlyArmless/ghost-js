@@ -39,6 +39,10 @@ button {
   margin: 2px;
 }
 
+.wideButton {
+  width: 150px;
+}
+
 .startGame {
   background-color: lightseagreen;
   color: black;

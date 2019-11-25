@@ -1,9 +1,29 @@
+import { timeoutPromise } from "./tools";
+
 const serverUrl = "https://ghost-word-server.herokuapp.com";
 
 export class API
 {
     constructor()
     {
+    }
+
+    async pingServer(): Promise<boolean>
+    {
+        try
+        {
+            // Wait up to 10 seconds for the Heroku-hosted ghost-word-server to respond.
+            const response = await timeoutPromise( 10000, window.fetch( `${serverUrl}/` ) ) as Response;
+            console.log( response );
+
+            const res = await response.json();
+            return res === "Server online";
+        }
+        catch ( error )
+        {
+            console.error( error );
+            return false;
+        }
     }
 
     async checkForWord( testWord: string, minWordLength: number ): Promise<boolean>
