@@ -28,6 +28,12 @@ const initialState: GameOverState = {
 
 export class GameOver extends React.Component<GameOverProps, GameOverState>
 {
+    constructor( props: GameOverProps )
+    {
+        super( props );
+        this.state = initialState;
+    }
+
     addToBlacklist = () =>
     {
         this.props.addToBlacklist( this.props.gameString );
