@@ -18,6 +18,8 @@ interface NewGameProps
     getBlacklist(): Promise<string[]>;
     getWhitelist(): Promise<string[]>;
     handleHelp(): void;
+    clearBlacklist(): Promise<void>;
+    clearWhitelist(): Promise<void>;
 }
 
 interface NewGameState
@@ -41,6 +43,22 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
     {
         super( props );
         this.state = initialState;
+    }
+
+    clearBlacklist = async () =>
+    {
+        await this.props.clearBlacklist();
+        this.setState( {
+            blacklist: await this.props.getBlacklist()
+        } );
+    }
+
+    clearWhitelist = async () =>
+    {
+        await this.props.clearWhitelist();
+        this.setState( {
+            whitelist: await this.props.getWhitelist()
+        } );
     }
 
     async componentWillMount()
@@ -84,9 +102,16 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
     private buildBlacklist()
     {
+        const button = this.state.blacklist.length > 0 &&
+            <Button
+                text='Clear Blacklist'
+                onClick={ this.clearBlacklist }
+            />
+
         return (
             <>
                 <h2>Blacklisted words:</h2>
+                { button }
                 <ol>
                     { this.state.blacklist.map( ( word: string ) => { return ( <li key={ word }>{ word }</li> ); } ) }
                 </ol>
@@ -96,9 +121,16 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
     private buildWhitelist()
     {
+        const button = this.state.whitelist.length > 0 &&
+            <Button
+                text='Clear Whitelist'
+                onClick={ this.clearWhitelist }
+            />
+
         return (
             <>
                 <h2>Whitelisted words:</h2>
+                { button }
                 <ol>
                     { this.state.whitelist.map( ( word: string ) => { return <li key={ word }>{ word }</li>; } ) }
                 </ol>
@@ -142,7 +174,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
                         text='Add Player'
                     />
                 </fieldset>
-                
+
                 <Button
                     onClick={ this.toggleBlacklistVisibility }
                     text={ this.state.blacklistVisible ? 'Hide Blacklist' : 'Show Blacklist' }

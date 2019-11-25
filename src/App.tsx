@@ -505,6 +505,8 @@ class App extends React.Component<AppProps, AppState> {
                         getBlacklist={ this.API.getBlacklist }
                         getWhitelist={ this.API.getWhitelist }
                         handleHelp={ this.handleHelp }
+                        clearBlacklist={ this.API.clearBlacklist }
+                        clearWhitelist={ this.API.clearWhitelist }
                     />
                 );
                 break;

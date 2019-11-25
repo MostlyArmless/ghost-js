@@ -96,4 +96,30 @@ export class API
             console.error( error );
         }
     }
+
+    async clearBlacklist(): Promise<void>
+    {
+        try
+        {
+            const data = await window.fetch( `${serverUrl}/clearBlacklist/` );
+            console.log( JSON.stringify( data ) );
+        }
+        catch ( error )
+        {
+            console.error( error );
+        }
+    }
+
+    async clearWhitelist(): Promise<void>
+    {
+        try
+        {
+            const data = await window.fetch( `${serverUrl}/clearWhitelist/` );
+            console.log( JSON.stringify( data ) );
+        }
+        catch ( error )
+        {
+            console.error( error );
+        }
+    }
 }
