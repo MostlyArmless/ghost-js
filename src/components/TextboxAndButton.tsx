@@ -5,7 +5,7 @@ import { Button } from './Button';
 interface TextboxAndButtonProps
 {
     buttonText: string;
-    onSubmit( textboxContents: string ): Promise<void>;
+    onSubmit( textboxContents: string ): Promise<void> | void; //? Is it bad practice to allow either async or sync funcs under the same name? Is there a better way?
     id?: string;
 }
 

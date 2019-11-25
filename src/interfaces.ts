@@ -21,4 +21,4 @@ export interface GameSettings
     [key: string]: SettingStruct
 }
 
-export type AppPage = 'NewGame' | 'Play' | 'GameOver' | 'Help' | 'Settings';
+export type AppPage = 'NewGame' | 'Play' | 'GameOver' | 'Help' | 'Settings' | 'PromptUserForWord';

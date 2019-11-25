@@ -9,6 +9,7 @@ import { GameOverReason } from "./constants";
 import { GameSettingKey, GameSettings, Player, PlayerType, AppPage } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
+import { PromptUserForWord } from "./components/PromptUserForWord";
 
 interface AppProps { }
 
@@ -27,11 +28,12 @@ interface AppState
     loser: Player;
     winner: Player;
     waitingForAiToChooseLetter: boolean;
+    rebuttalWord: string;
 }
 
 const initialPlayers: Player[] = [
     { name: "Mike", type: "Human" },
-    { name: "Borg", type: "AI" }
+    { name: "SPAGBOL", type: "Human" }
 ];
 
 const initialState: AppState = {
@@ -55,7 +57,7 @@ const initialState: AppState = {
         wordRecognitionMode: {
             settingKey: "wordRecognitionMode",
             title: "Word Recognition Mode",
-            value: "auto",
+            value: "manual",
             options: ["auto", "manual"]
         },
         wordListInGame: {
@@ -72,7 +74,8 @@ const initialState: AppState = {
     possibleWordList: [],
     loser: initialPlayers[0],
     winner: initialPlayers[1],
-    waitingForAiToChooseLetter: false
+    waitingForAiToChooseLetter: false,
+    rebuttalWord: ''
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -95,7 +98,7 @@ class App extends React.Component<AppProps, AppState> {
         return this.state.gameSettings[settingKey].value;
     }
 
-    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: Player )
+    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: Player, winner?: Player )
     {
         console.log( `Game over because ${gameOverReason}...` );
         this.setState( {
@@ -104,6 +107,11 @@ class App extends React.Component<AppProps, AppState> {
             gameOverReason: gameOverReason,
             loser: loser
         } );
+
+        if ( winner )
+        {
+            this.setState( { winner: winner } );
+        }
     }
 
     savePossibleWordListToState = ( possibleWordList: string[] ) =>
@@ -353,34 +361,69 @@ class App extends React.Component<AppProps, AppState> {
 
     handleCallBullshit = async () =>
     {
+        switch ( this.getGameSettingValue( "wordRecognitionMode" ) )
+        {
+            case "auto":
+                await this.handleAutoCallBullshit();
+                break;
+            case "manual":
+                this.handleManualCallBullshit();
+                break;
+            default:
+                console.error( `Invalid wordRecognitionMode` );
+                break;
+        }
+    };
+
+    handleManualCallBullshit = () =>
+    {
+        // Current player called bullshit on the previous player. Give the previous player a chance to supply a valid word
+        this.setState( { currentPage: "PromptUserForWord" } );
+    }
+
+    handleSubmitBullshitRebuttal = async ( rebuttalWord: string ) =>
+    {
+        if ( await this.API.checkForWord( rebuttalWord, this.getGameSettingValue( "minWordLength" ) as number ) )
+        {
+            // The word is in the dictionary, so the BS-caller loses
+            this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
+        }
+        else
+        {
+            // The word is NOT in the dictionary, so the BS-callee loses
+            // TODO - make it possible for the BS-caller to accept the word anyways (because they know it's really a word), and add it to the dictionary.
+            this.gameOver( this.state.gameString, GameOverReason.goodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
+        }
+    }
+
+    handleAutoCallBullshit = async () =>
+    {
         try
         {
             const possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
             if ( possibleWordList.length > 0 )
             {
-                this.setState( {
-                    currentPage: "GameOver",
-                    gameOverReason: GameOverReason.badBullshitCall,
-                    loser: this.getCurrentPlayer(),
-                    winner: this.getPreviousPlayer(),
-                    possibleWordList: possibleWordList
-                } );
+                this.gameOver(
+                    this.state.gameString,
+                    GameOverReason.badBullshitCall,
+                    this.getCurrentPlayer(),
+                    this.getPreviousPlayer()
+                );
             }
             else
             {
-                this.setState( {
-                    currentPage: "GameOver",
-                    gameOverReason: GameOverReason.goodBullshitCall,
-                    loser: this.getPreviousPlayer(),
-                    winner: this.getCurrentPlayer()
-                } );
+                this.gameOver(
+                    this.state.gameString,
+                    GameOverReason.goodBullshitCall,
+                    this.getPreviousPlayer()
+                );
             }
         }
         catch ( error )
         {
             console.log( error );
         }
-    };
+    }
 
     aiGetNextChar = async () =>
     {
@@ -514,6 +557,17 @@ class App extends React.Component<AppProps, AppState> {
                 page = ( <HelpPage
                     handleBack={ this.handleBack }
                 /> );
+                break;
+
+            case "PromptUserForWord":
+                page = (
+                    <PromptUserForWord
+                        gameString={ this.state.gameString }
+                        currentPlayer={ this.getCurrentPlayer() }
+                        previousPlayer={ this.getPreviousPlayer() }
+                        handleSubmitWord={ this.handleSubmitBullshitRebuttal }
+                    />
+                )
                 break;
 
             default:
