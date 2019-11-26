@@ -425,7 +425,8 @@ class App extends React.Component<AppProps, AppState> {
                 this.gameOver(
                     this.state.gameString,
                     GameOverReason.goodBullshitCall,
-                    this.getPreviousPlayer()
+                    this.getPreviousPlayer(),
+                    this.getCurrentPlayer()
                 );
             }
         }
