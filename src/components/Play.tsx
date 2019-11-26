@@ -4,6 +4,7 @@ import { Spinner } from './Spinner';
 import { Button } from './Button'
 import * as _ from 'underscore';
 import { ENTER_KEY_CODE } from '../constants';
+import { NumberedList } from './NumberedList';
 
 const initialState: PlayState = {
 }
@@ -99,16 +100,12 @@ export class Play extends React.Component<PlayProps, PlayState> {
     private buildPossibleWordList()
     {
         const randomSubsetOfPossibleWords: string[] = _.sample( this.props.possibleWordList, 20 );
-        const listItems = randomSubsetOfPossibleWords.map( ( word: string ) =>
-        {
-            return <li key={ word }>{ word }</li>;
-        } );
 
         return (
             <>
                 <br />
                 Random sample of possible words:
-            <ol>{ listItems }</ol>
+                <NumberedList data={ randomSubsetOfPossibleWords } />
             </>
         )
     }

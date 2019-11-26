@@ -3,6 +3,7 @@ import { Button } from './Button';
 import { NameField } from './NameField';
 import { Player, PlayerType } from '../interfaces';
 import { PlayerTypeSelect } from './PlayerTypeSelect';
+import { NumberedList } from './NumberedList';
 
 interface NewGameProps
 {
@@ -95,7 +96,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
                 <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ this.props.handleChangePlayerType } />
 
                 { id > 1 &&
-                    <Button key={ id + '_button' } id={ id } onClick={ this.props.handleRemovePlayer } text='Delete' /> }
+                    <Button key={ id + '_button' } id={ id } onClick={ this.props.handleRemovePlayer } text='Remove Player' /> }
             </div> );
         } );
     }
@@ -112,16 +113,16 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
             <>
                 <h2>Blacklisted words:</h2>
                 { button }
-                <ol>
-                    { this.state.blacklist.map( ( word: string ) => { return ( <li key={ word }>{ word }</li> ); } ) }
-                </ol>
+                { this.state.blacklist.length > 0 ? <NumberedList data={ this.state.blacklist } /> : <p>No words have been blacklisted yet.</p> }
             </>
         );
     }
 
     private buildWhitelist()
     {
-        const button = this.state.whitelist.length > 0 &&
+        const shouldShow = this.state.whitelist.length > 0;
+
+        const button = shouldShow &&
             <Button
                 text='Clear Whitelist'
                 onClick={ this.clearWhitelist }
@@ -131,9 +132,7 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
             <>
                 <h2>Whitelisted words:</h2>
                 { button }
-                <ol>
-                    { this.state.whitelist.map( ( word: string ) => { return <li key={ word }>{ word }</li>; } ) }
-                </ol>
+                { this.state.whitelist.length > 0 ? <NumberedList data={ this.state.whitelist } /> : <p>No words have been added to the dictionary yet.</p> }
             </>
         );
     }
