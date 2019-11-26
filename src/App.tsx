@@ -262,6 +262,13 @@ class App extends React.Component<AppProps, AppState> {
         const numPlayers: number = this.state.players.length;
         const numAiPlayers: number = this.state.players.map( ( player ): number => { return player.type == 'AI' ? 1 : 0 } ).reduce( ( acc, curr ) => { return acc + curr; } );
 
+        // TODO - fix the problems that arise in a multi-AI game, then remove this block:
+        if ( numAiPlayers === 1 && newType == 'AI' )
+        {
+            alert( 'ghost-js currently only supports up to 1 AI player. Multi-AI play coming soon.' );
+            return;
+        }
+
         if ( numAiPlayers === numPlayers - 1 && newType == 'AI' )
         {
             alert( 'Must have at least 1 Human player' );
