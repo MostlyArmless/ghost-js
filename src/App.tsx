@@ -5,7 +5,7 @@ import { GameOver } from "./components/GameOver";
 import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
-import { GameOverReason } from "./constants";
+import { GameOverReason, WordRecognitionMode } from "./constants";
 import { GameSettingKey, GameSettings, Player, PlayerType, AppPage } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
@@ -369,18 +369,20 @@ class App extends React.Component<AppProps, AppState> {
 
     handleCallBullshit = async () =>
     {
-        switch ( this.getGameSettingValue( "wordRecognitionMode" ) )
+        const mode = this.getGameSettingValue( "wordRecognitionMode" );
+        if ( mode || this.getCurrentPlayer().type == 'AI' )
         {
-            case "auto":
-                await this.handleAutoCallBullshit();
-                break;
-            case "manual":
-                this.handleManualCallBullshit();
-                break;
-            default:
-                console.error( `Invalid wordRecognitionMode` );
-                break;
+            await this.handleAutoCallBullshit();
+            return;
         }
+
+        if ( mode == 'manual' )
+        {
+            this.handleManualCallBullshit();
+            return;
+        }
+
+        console.error( `Invalid wordRecognitionMode` );
     };
 
     handleManualCallBullshit = () =>
