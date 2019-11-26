@@ -74,7 +74,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
 
         const addToBlacklistButton = this.props.gameOverReason === GameOverReason.finishedWord &&
             <Button
-                text={ `Remove word from dictionary` }
+                text='Blacklist Word'
                 onClick={ this.addToBlacklist }
             />
 
