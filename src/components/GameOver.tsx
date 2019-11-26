@@ -34,7 +34,6 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
     {
         super( props );
         this.state = initialState;
-        console.log( `GAME OVER PROPS: ${props}` );
     }
 
     addToBlacklist = () =>

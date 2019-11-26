@@ -29,10 +29,9 @@ export class API
     {
         if ( testWord.length < minWordLength )
         {
-            console.log( 'Word too short, not checking' );
             return false;
         }
-        console.log( `Checking for word '${testWord}'...` );
+
         try
         {
             const response = await window.fetch( `${serverUrl}/isword/${testWord}` );
