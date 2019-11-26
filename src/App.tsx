@@ -128,7 +128,7 @@ class App extends React.Component<AppProps, AppState> {
         if ( this.gameStringAboveMinLength( updatedGameString ) )
         {
             const possibleWordList = await this.API.getPossibleWords( updatedGameString, this.savePossibleWordListToState );
-            if ( possibleWordList.length === 1 && possibleWordList[0] === updatedGameString )
+            if ( possibleWordList.includes( updatedGameString ) )
             {
                 this.gameOver( updatedGameString, GameOverReason.finishedWord, this.getCurrentPlayer() );
                 return;
