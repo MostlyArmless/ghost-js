@@ -109,7 +109,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
                 return <p>{ this.props.losingPlayer.name } lost because no word starts with "{ this.props.gameString }"</p>;
 
             case GameOverReason.goodBullshitCall:
-                return <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them<br />There are no words that start with "{ this.props.gameString }"</p>;
+                return <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them.<br />There are no words that start with "{ this.props.gameString }"</p>;
 
             case GameOverReason.badBullshitCall:
                 return ( <>
