@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./build/",
-    "jsx": "preserve",
+    "jsx": "react",
     "target": "es5",
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,7 +17,8 @@
     "lib": [
       "esnext",
       "dom"
-    ]
+    ],
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "./src"
