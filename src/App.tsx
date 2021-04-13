@@ -5,7 +5,7 @@ import { GameOver } from "./components/GameOver";
 import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
-import { GameOverReason, WordRecognitionMode } from "./constants";
+import { GameOverReason } from "./constants";
 import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";

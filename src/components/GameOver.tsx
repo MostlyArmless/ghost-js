@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { GameOverReason, ENTER_KEY_CODE } from '../constants';
+import { GameOverReason } from '../constants';
 import { IPlayer } from '../interfaces';
 import { Button } from './Button';
 import { RemovableWord } from './RemovableWord';
