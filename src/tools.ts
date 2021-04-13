@@ -1,5 +1,5 @@
 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-export function getRandomLetter(): string
+export function chooseRandomLetter(): string
 {
     return getRandomElementFromArray( alphabet );
 }

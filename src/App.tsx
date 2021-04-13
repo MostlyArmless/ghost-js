@@ -7,7 +7,7 @@ import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { GameOverReason } from "./constants";
 import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
-import { getRandomLetter, getRandomElementFromArray } from "./tools";
+import { chooseRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
@@ -461,7 +461,7 @@ class App extends React.Component<AppProps, AppState> {
             nextLetter = targetWord[this.state.gameString.length];
             if ( nextLetter === undefined )
             {
-                nextLetter = getRandomLetter();
+                nextLetter = chooseRandomLetter();
                 console.log( `AI failed to choose a valid letter when aiming for target word "${targetWord}". overriding with random letter '${nextLetter}'` );
             }
             else
@@ -472,7 +472,7 @@ class App extends React.Component<AppProps, AppState> {
         else
         {
             // AI realizes it can't do anything so it'll try to BS with a random letter
-            nextLetter = getRandomLetter();
+            nextLetter = chooseRandomLetter();
             console.log( `AI can't think of any words, bullshitting with letter '${nextLetter}'` );
         }
 
