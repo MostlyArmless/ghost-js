@@ -35,17 +35,20 @@ export class Play extends React.Component<PlayProps, PlayState> {
         this.state = initialState;
     }
 
+    submitChar = () =>
+    {
+        if ( this.props.nextChar.length === 0 )
+        {
+            alert( "Can't submit a blank" );
+            return;
+        }
+        this.props.commitNextChar();
+    }
+    
     onKeyDown = ( event: React.KeyboardEvent<HTMLInputElement> ) =>
     {
         if ( event.keyCode === ENTER_KEY_CODE )
-        {
-            if ( this.props.nextChar.length === 0 )
-            {
-                alert( "Can't submit a blank" );
-                return;
-            }
-            this.props.commitNextChar();
-        }
+            this.submitChar();
     }
 
     render()
@@ -82,6 +85,12 @@ export class Play extends React.Component<PlayProps, PlayState> {
                     maxLength={ 1 }
                     onKeyDown={ this.onKeyDown }
                     value={ this.props.nextChar }
+                    width={5}
+                />
+                <Button
+                id={ 2 }
+                text="Submit letter"
+                onClick={this.submitChar}
                 />
                 <p>Game String:</p>
                 <input
