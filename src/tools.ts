@@ -9,6 +9,7 @@ export function getRandomElementFromArray( arr: any[] | string )
     return arr[Math.floor( Math.random() * arr.length )];
 }
 
+// Wait for a promise to either resolve or reject, will also reject after specified timeout has elapsed.
 export function timeoutPromise( ms: number, promise: Promise<any> )
 {
     return new Promise( ( resolve, reject ) =>
