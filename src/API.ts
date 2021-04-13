@@ -4,10 +4,6 @@ const serverUrl = "https://ghost-word-server.herokuapp.com";
 
 export class API
 {
-    constructor()
-    {
-    }
-
     async pingServer(): Promise<boolean>
     {
         try
