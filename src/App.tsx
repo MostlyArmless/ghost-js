@@ -135,7 +135,7 @@ class App extends React.Component<AppProps, AppState> {
             }
             else if ( possibleWordList.length === 0 )
             {
-                if ( this.state.gameSettings.wordRecognitionMode.value == "auto" )
+                if ( this.state.gameSettings.wordRecognitionMode.value === "auto" )
                 {
                     this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
                     return;
@@ -260,16 +260,16 @@ class App extends React.Component<AppProps, AppState> {
     handleChangePlayerType = ( index: number, newType: PlayerType ) =>
     {
         const numPlayers: number = this.state.players.length;
-        const numAiPlayers: number = this.state.players.map( ( player ): number => { return player.type == 'AI' ? 1 : 0 } ).reduce( ( acc, curr ) => { return acc + curr; } );
+        const numAiPlayers: number = this.state.players.map( ( player ): number => { return player.type === 'AI' ? 1 : 0 } ).reduce( ( acc, curr ) => { return acc + curr; } );
 
         // TODO - fix the problems that arise in a multi-AI game, then remove this block:
-        if ( numAiPlayers === 1 && newType == 'AI' )
+        if ( numAiPlayers === 1 && newType === 'AI' )
         {
             alert( 'ghost-js currently only supports up to 1 AI player. Multi-AI play coming soon.' );
             return;
         }
 
-        if ( numAiPlayers === numPlayers - 1 && newType == 'AI' )
+        if ( numAiPlayers === numPlayers - 1 && newType === 'AI' )
         {
             alert( 'Must have at least 1 Human player' );
             return;
@@ -323,7 +323,7 @@ class App extends React.Component<AppProps, AppState> {
     handleAddPlayer = () =>
     {
         const maxPlayers = this.getGameSettingValue( 'maxNumPlayers' );
-        if ( this.state.players.length == maxPlayers )
+        if ( this.state.players.length === maxPlayers )
         {
             alert( `You can't have more than ${maxPlayers} players` );
             return;
@@ -377,13 +377,13 @@ class App extends React.Component<AppProps, AppState> {
     handleCallBullshit = async () =>
     {
         const mode = this.getGameSettingValue( "wordRecognitionMode" );
-        if ( mode || this.getCurrentPlayer().type == 'AI' )
+        if ( mode || this.getCurrentPlayer().type === 'AI' )
         {
             await this.handleAutoCallBullshit();
             return;
         }
 
-        if ( mode == 'manual' )
+        if ( mode === 'manual' )
         {
             this.handleManualCallBullshit();
             return;
