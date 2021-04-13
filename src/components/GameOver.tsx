@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { GameOverReason, ENTER_KEY_CODE } from '../constants';
-import { Player } from '../interfaces';
+import { IPlayer } from '../interfaces';
 import { Button } from './Button';
 import { RemovableWord } from './RemovableWord';
 import { TextboxAndButton } from './TextboxAndButton';
@@ -8,8 +8,8 @@ import { TextboxAndButton } from './TextboxAndButton';
 interface GameOverProps
 {
     gameOverReason: GameOverReason;
-    losingPlayer: Player;
-    winningPlayer: Player;
+    losingPlayer: IPlayer;
+    winningPlayer: IPlayer;
     gameString: string;
     possibleWordList: string[];
     handleNewGame(): void;

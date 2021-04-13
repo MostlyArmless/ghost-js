@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Player } from '../interfaces';
+import { IPlayer } from '../interfaces';
 import { TextboxAndButton } from './TextboxAndButton';
 
 interface PromptUserForWordProps
 {
-    currentPlayer: Player;
-    previousPlayer: Player;
+    currentPlayer: IPlayer;
+    previousPlayer: IPlayer;
     gameString: string;
     handleSubmitWord( word: string ): void;
 }

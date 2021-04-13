@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button } from './Button';
 import { NameField } from './NameField';
-import { Player, PlayerType } from '../interfaces';
+import { IPlayer, PlayerType } from '../interfaces';
 import { PlayerTypeSelect } from './PlayerTypeSelect';
 import { NumberedList } from './NumberedList';
 
 interface NewGameProps
 {
-    playerList: Player[];
+    playerList: IPlayer[];
     handleRenamePlayer( index: number, newName: string ): void;
     handleChangePlayerType( index: number, newType: PlayerType ): void;
     handleAddPlayer(): void;

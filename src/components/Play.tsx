@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Player } from '../interfaces';
+import { IPlayer } from '../interfaces';
 import { Spinner } from './Spinner';
 import { Button } from './Button'
 import * as _ from 'underscore';
@@ -18,8 +18,8 @@ export interface PlayProps
     handleNextCharChange( event: any ): void;
     nextChar: string;
     gameString: string;
-    getCurrentPlayer(): Player;
-    getPreviousPlayer(): Player;
+    getCurrentPlayer(): IPlayer;
+    getPreviousPlayer(): IPlayer;
     commitNextChar(): void;
     possibleWordList: string[];
     handleCallBullshit(): void;

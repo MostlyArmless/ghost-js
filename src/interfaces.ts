@@ -1,12 +1,12 @@
 export type PlayerType = "AI" | "Human";
 
-export interface Player
+export interface IPlayer
 {
     name: string;
     type: PlayerType;
 }
 
-export interface SettingStruct
+export interface ISetting
 {
     title: string;
     settingKey: GameSettingKey;
@@ -18,7 +18,7 @@ export type GameSettingKey = 'minWordLength' | 'maxNumPlayers' | 'wordRecognitio
 
 export interface GameSettings
 {
-    [key: string]: SettingStruct
+    [key: string]: ISetting
 }
 
 export type AppPage = 'Startup' | 'NewGame' | 'Play' | 'GameOver' | 'Help' | 'Settings' | 'PromptUserForWord';

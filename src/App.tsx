@@ -6,7 +6,7 @@ import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { GameOverReason, WordRecognitionMode } from "./constants";
-import { GameSettingKey, GameSettings, Player, PlayerType, AppPage } from "./interfaces";
+import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
 import { getRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
@@ -19,20 +19,20 @@ interface AppState
     currentPage: AppPage;
     previousPage: AppPage;
     invalidPlayerNames: boolean;
-    players: Player[];
+    players: IPlayer[];
     gameSettings: GameSettings;
     nextChar: string;
     gameString: string;
     currentPlayerIndex: number;
     gameOverReason: GameOverReason;
     possibleWordList: string[];
-    loser: Player;
-    winner: Player;
+    loser: IPlayer;
+    winner: IPlayer;
     waitingForAiToChooseLetter: boolean;
     rebuttalWord: string;
 }
 
-const initialPlayers: Player[] = [
+const initialPlayers: IPlayer[] = [
     { name: "Mike", type: "Human" },
     { name: "Borg", type: "AI" }
 ];
@@ -99,7 +99,7 @@ class App extends React.Component<AppProps, AppState> {
         return this.state.gameSettings[settingKey].value;
     }
 
-    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: Player, winner?: Player )
+    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: IPlayer, winner?: IPlayer )
     {
         console.log( `Game over because ${gameOverReason}...` );
         this.setState( {
