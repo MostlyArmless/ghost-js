@@ -1,7 +1,8 @@
 import { timeoutPromise } from "./tools";
 
-const serverUrl = "https://ghost-word-server.herokuapp.com";
+const serverUrl = process.env.NODE_ENV === "production" ? "https://ghost-word-server.herokuapp.com" : "http://localhost:3001";
 
+// Communicate with the ghost-word-server to check if words exist, get list of possible words given the current string, etc.
 export class API
 {
     async pingServer(): Promise<boolean>
