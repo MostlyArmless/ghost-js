@@ -505,7 +505,7 @@ class App extends React.Component<AppProps, AppState> {
                         possibleWordList={ this.state.possibleWordList }
                         handleCallBullshit={ this.handleCallBullshit }
                         handleExitGame={ this.resetGame }
-                        displayWordList={ this.getGameSettingValue( "wordListInGame" ) as boolean }
+                        displayWordList={ this.getGameSettingValue( "wordListInGame" ) === "Show" }
                         waitingForAiToChooseLetter={ this.state.waitingForAiToChooseLetter }
                     />
                 );
