@@ -104,7 +104,7 @@ export class Play extends React.Component<PlayProps, PlayState> {
         return (
             <>
                 <br />
-                Random sample of possible words:
+                Random sample of possible words starting with "{this.props.gameString}":
                 <NumberedList data={ randomSubsetOfPossibleWords } />
             </>
         )
