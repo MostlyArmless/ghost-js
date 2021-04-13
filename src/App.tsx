@@ -7,10 +7,10 @@ import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { GameOverReason } from "./constants";
 import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
-import { chooseRandomLetter, getRandomElementFromArray } from "./tools";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
+import { RoboPlayer } from "./RoboPlayer";
 
 interface AppProps { }
 
@@ -81,12 +81,14 @@ const initialState: AppState = {
 
 class App extends React.Component<AppProps, AppState> {
     API: API;
+    roboPlayer: RoboPlayer;
 
     constructor( props: AppProps )
     {
         super( props );
         this.state = initialState;
         this.API = new API();
+        this.roboPlayer = new RoboPlayer( this.API );
     }
 
     getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
@@ -149,7 +151,7 @@ class App extends React.Component<AppProps, AppState> {
     aiPlaceLetterAndCommit = async () =>
     {
         this.setState( { waitingForAiToChooseLetter: true } );
-        const nextChar = await this.aiGetNextChar();
+        const nextChar = await this.roboPlayer.chooseNextLetter( this.state.gameString );
 
         this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
     }
@@ -444,41 +446,7 @@ class App extends React.Component<AppProps, AppState> {
         }
     }
 
-    aiGetNextChar = async () =>
-    {
-        // AI will choose the next letter based on the current string
-        console.log( `Taking AI turn, with current string = "${this.state.gameString}"...` );
-        let nextLetter = "";
 
-        let possibleWordList: string[] = [];
-        if ( this.state.gameString.length > 0 )
-        {
-            possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
-        }
-
-        if ( possibleWordList.length > 0 )
-        {
-            const targetWord = getRandomElementFromArray( possibleWordList ); // AI will choose a new target word every turn.
-            nextLetter = targetWord[this.state.gameString.length];
-            if ( nextLetter === undefined )
-            {
-                nextLetter = chooseRandomLetter();
-                console.log( `AI failed to choose a valid letter when aiming for target word "${targetWord}". overriding with random letter '${nextLetter}'` );
-            }
-            else
-            {
-                console.log( `AI aiming for target word "${targetWord}". Submitting next letter '${nextLetter}'` );
-            }
-        }
-        else
-        {
-            // AI realizes it can't do anything so it'll try to BS with a random letter
-            nextLetter = chooseRandomLetter();
-            console.log( `AI can't think of any words, bullshitting with letter '${nextLetter}'` );
-        }
-
-        return nextLetter;
-    };
 
     private gameStringAboveMinLength( updatedGameString: string ): boolean
     {
@@ -494,12 +462,10 @@ class App extends React.Component<AppProps, AppState> {
     {
         this.setState( previousState =>
         {
-
             return {
                 currentPage: previousState.previousPage,
                 previousPage: "NewGame" // TODO - implement a stack so we can have indefinite Back depth
             };
-
         } )
     }
 

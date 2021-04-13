@@ -42,13 +42,14 @@ export class API
         }
     }
 
-    async getPossibleWords( wordPart: string, saveToState: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    async getPossibleWords( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
     {
         try
         {
             const response = await window.fetch( `${serverUrl}/possiblewords/${wordPart}` );
             const possibleWordList = await response.json();
-            saveToState( possibleWordList );
+            if ( saveToState !== undefined )
+                saveToState( possibleWordList );
             return possibleWordList;
         }
         catch ( error )
