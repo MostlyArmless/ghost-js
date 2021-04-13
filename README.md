@@ -31,6 +31,6 @@ May the best man never spell anything!
 
 ## Developer Notes
 
-To run this in development mode, just debug main in VS Code. Or just run with `npm start`. Make sure you `npm start` the server first though.
+To run this in development mode, just debug main in VS Code. Or just run with `npm run dev`. Make sure you `npm start` the server first though.
 
 Maybe I should add a PossibleWords property to GhostGame that contains a list of all possible words that could be constructed from the current string, and which updates every turn. This would be a good debugging tool, regardless. When there's lots of matches, it should display a sample 9 words: the 3 shortest words, 3 longest words, and 3 words from the middle of the list. Need to sort the list of candidate words by length and grab the first 3, last 3, and 3 from the middle with an even/odd length if statement.
