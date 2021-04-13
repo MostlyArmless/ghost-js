@@ -148,20 +148,14 @@ class App extends React.Component<AppProps, AppState> {
         this.nextTurn( updatedGameString );
     };
 
-    aiPlaceLetterAndCommit = async () =>
+    takeAiTurnIfNeeded = async () =>
     {
+        if ( this.getCurrentPlayer().type !== 'AI' )
+            return;
+
         this.setState( { waitingForAiToChooseLetter: true } );
         const nextChar = await this.roboPlayer.chooseNextLetter( this.state.gameString );
-
         this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
-    }
-
-    takeAiTurnIfNeeded = () =>
-    {
-        if ( this.getCurrentPlayer().type === 'AI' )
-        {
-            this.aiPlaceLetterAndCommit();
-        }
     }
 
     nextTurn = ( updatedGameString: string ) =>
@@ -197,12 +191,6 @@ class App extends React.Component<AppProps, AppState> {
         const nextPlayerIndex =
             ( this.state.currentPlayerIndex + 1 ) % this.state.players.length;
         return this.state.players[nextPlayerIndex];
-    };
-
-    isNextPlayerAi = () =>
-    {
-        console.log( "is next player ai?" );
-        return this.getNextPlayer().type === "AI";
     };
 
     resetGame = () =>
