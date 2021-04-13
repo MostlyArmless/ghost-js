@@ -332,10 +332,11 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( ( previousState: AppState ) =>
         {
             return {
-                players: previousState.players.concat( {
+                players: [...previousState.players,
+                {
                     name: "New Player",
                     type: "Human"
-                } )
+                }]
             };
         } );
     };
