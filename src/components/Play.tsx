@@ -116,8 +116,8 @@ export class Play extends React.Component<PlayProps, PlayState> {
                 Random sample of possible words starting with "{this.props.gameString}":
                 {
                 randomSubsetOfPossibleWords.length > 0
-                ? <NumberedList data={ randomSubsetOfPossibleWords } />
-                : <p>NO WORDS START WITH THESE LETTERS!</p>
+                    ? <NumberedList data={ randomSubsetOfPossibleWords } />
+                    : <p>NO WORDS START WITH THESE LETTERS!</p>
                 }
             </>
         )
