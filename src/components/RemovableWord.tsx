@@ -16,6 +16,8 @@ const initialState: RemovableWordState = {
     hasBeenRemoved: false
 }
 
+const alreadyRemovedText = " - (Removed from dictionary)";
+
 export class RemovableWord extends React.Component<RemovableWordProps, RemovableWordState>
 {
     constructor( props: RemovableWordProps )
@@ -40,8 +42,6 @@ export class RemovableWord extends React.Component<RemovableWordProps, Removable
             text='Remove from Dictionary'
             onClick={ this.handleClick }
         />;
-
-        const alreadyRemovedText = " - (Removed from dictionary)";
 
         return (
             <>

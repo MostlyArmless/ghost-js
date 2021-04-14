@@ -5,7 +5,7 @@ import { GameOver } from "./components/GameOver";
 import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
-import { GameOverReason } from "./constants";
+import { eGameActions, GameOverReason } from "./constants";
 import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
@@ -30,6 +30,8 @@ interface AppState
     winner: IPlayer;
     waitingForAiToChooseLetter: boolean;
     rebuttalWord: string;
+    whitelistedWords: string[];
+    blacklistedWords: string[];
 }
 
 const initialPlayers: IPlayer[] = [
@@ -76,7 +78,9 @@ const initialState: AppState = {
     loser: initialPlayers[0],
     winner: initialPlayers[1],
     waitingForAiToChooseLetter: false,
-    rebuttalWord: ''
+    rebuttalWord: '',
+    whitelistedWords: [],
+    blacklistedWords: []
 };
 
 class App extends React.Component<AppProps, AppState> {
@@ -154,8 +158,31 @@ class App extends React.Component<AppProps, AppState> {
             return;
 
         this.setState( { waitingForAiToChooseLetter: true } );
-        const nextChar = await this.roboPlayer.chooseNextLetter( this.state.gameString );
-        this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
+        const robotNextMove = await this.roboPlayer.decideNextMove( this.state.gameString );
+        switch ( robotNextMove )
+        {
+            case eGameActions.CallBullshit:
+                {
+                    await this.handleCallBullshit();
+                    return;
+                }
+            case eGameActions.AppendLetter:
+                {
+                    const nextChar = await this.roboPlayer.chooseLetterToAppend( this.state.gameString );
+                    this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
+                    return
+                }
+            case eGameActions.PrependLetter:
+                {
+                    // const nextChar = await this.roboPlayer.chooseLetterToPrepend( this.state.gameString );
+                    // TODO - implement prependLetter
+                    return
+                }
+            default:
+                {
+                    throw new Error( `Invalid game action selected by AI: "${robotNextMove}"` );
+                }
+        }
     }
 
     nextTurn = ( updatedGameString: string ) =>
@@ -368,22 +395,23 @@ class App extends React.Component<AppProps, AppState> {
     handleCallBullshit = async () =>
     {
         const mode = this.getGameSettingValue( "wordRecognitionMode" );
-        if ( mode || this.getCurrentPlayer().type === 'AI' )
+        console.log( `handlCallBullshit` );
+        if ( mode === "auto" || this.getPreviousPlayer().type === 'AI' )
         {
-            await this.handleAutoCallBullshit();
+            await this.resolveBullshitCallOnRobot();
             return;
         }
 
         if ( mode === 'manual' )
         {
-            this.handleManualCallBullshit();
+            this.resolveBullshitCallOnHuman();
             return;
         }
 
         console.error( `Invalid wordRecognitionMode` );
     };
 
-    handleManualCallBullshit = () =>
+    resolveBullshitCallOnHuman = () =>
     {
         // Current player called bullshit on the previous player. Give the previous player a chance to supply a valid word
         this.setState( { currentPage: "PromptUserForWord" } );
@@ -391,20 +419,25 @@ class App extends React.Component<AppProps, AppState> {
 
     handleSubmitBullshitRebuttal = async ( rebuttalWord: string ) =>
     {
-        if ( await this.API.checkForWord( rebuttalWord, this.getGameSettingValue( "minWordLength" ) as number ) )
+        await this.API.getPossibleWords( rebuttalWord, this.savePossibleWordListToState );
+
+        this.setState( { rebuttalWord: rebuttalWord }, async () =>
         {
-            // The word is in the dictionary, so the BS-caller loses
-            this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
-        }
-        else
-        {
-            // The word is NOT in the dictionary, so the BS-callee loses
-            // TODO - make it possible for the BS-caller to accept the word anyways (because they know it's really a word), and add it to the dictionary.
-            this.gameOver( this.state.gameString, GameOverReason.goodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
-        }
+            if ( await this.API.checkForWord( rebuttalWord, this.getGameSettingValue( "minWordLength" ) as number ) )
+            {
+                // The word is in the dictionary, so the BS-caller loses
+                this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
+            }
+            else
+            {
+                // The word is NOT in the dictionary, so the BS-callee loses
+                // TODO - make it possible for the BS-caller to accept the word anyways (because they know it's really a word), and add it to the dictionary.
+                this.gameOver( this.state.gameString, GameOverReason.goodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
+            }
+        } );
     }
 
-    handleAutoCallBullshit = async () =>
+    resolveBullshitCallOnRobot = async () =>
     {
         try
         {
@@ -434,7 +467,17 @@ class App extends React.Component<AppProps, AppState> {
         }
     }
 
+    refreshWhitelist = async () =>
+    {
+        const updatedWhitelist = await this.API.getWhitelist();
+        this.setState( { whitelistedWords: updatedWhitelist } );
+    }
 
+    refreshBlacklist = async () =>
+    {
+        const updatedBlacklist = await this.API.getBlacklist();
+        this.setState( { blacklistedWords: updatedBlacklist } );
+    }
 
     private gameStringAboveMinLength( updatedGameString: string ): boolean
     {
@@ -480,15 +523,17 @@ class App extends React.Component<AppProps, AppState> {
                         handleChangePlayerType={ this.handleChangePlayerType }
                         handleRemovePlayer={ this.handleRemovePlayer }
                         handleStartClicked={ this.handleStartClicked }
-                        invalidPlayerNames={ this.state.invalidPlayerNames }
+                        isAnyPlayerNameInvalid={ this.state.invalidPlayerNames }
                         handleAddPlayer={ this.handleAddPlayer }
                         reset={ this.resetGame }
                         handleSettingsClicked={ this.handleSettingsClicked }
-                        getBlacklist={ this.API.getBlacklist }
-                        getWhitelist={ this.API.getWhitelist }
+                        blacklistedWords={ this.state.blacklistedWords }
+                        whitelistedWords={ this.state.whitelistedWords }
                         handleHelp={ this.handleHelp }
-                        clearBlacklist={ this.API.clearBlacklist }
-                        clearWhitelist={ this.API.clearWhitelist }
+                        clearBlacklist={ async () => { await this.API.clearBlacklist(); this.setState( { blacklistedWords: [] } ); } }
+                        clearWhitelist={ async () => { await this.API.clearWhitelist(); this.setState( { whitelistedWords: [] } ); } }
+                        refreshBlacklist={ this.refreshBlacklist }
+                        refreshWhitelist={ this.refreshWhitelist }
                     />
                 );
                 break;
@@ -518,6 +563,7 @@ class App extends React.Component<AppProps, AppState> {
                         winningPlayer={ this.state.winner }
                         gameString={ this.state.gameString }
                         gameOverReason={ this.state.gameOverReason }
+                        rebuttalWord={ this.state.rebuttalWord }
                         handleNewGame={ this.resetGame }
                         possibleWordList={ this.state.possibleWordList }
                         addToBlacklist={ this.API.blacklistWord }

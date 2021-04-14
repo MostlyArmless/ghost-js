@@ -12,6 +12,8 @@ interface GameOverProps
     winningPlayer: IPlayer;
     gameString: string;
     possibleWordList: string[];
+    rebuttalWord?: string;
+
     handleNewGame(): void;
     addToBlacklist( word: string ): void;
     addToWhitelist( word: string ): void;
@@ -109,25 +111,33 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
                 return <p>{ this.props.losingPlayer.name } lost because no word starts with "{ this.props.gameString }"</p>;
 
             case GameOverReason.goodBullshitCall:
-                return <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them.<br />There are no words that start with "{ this.props.gameString }"</p>;
+                return (
+                    <>
+                        <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them.<br />There are no words that start with "{ this.props.gameString }"</p>
+                        {this.props.rebuttalWord && <p>"{ this.props.rebuttalWord }" is the word that { this.props.losingPlayer } responded with when challenged, but it is NOT a valid word.</p> }
+                    </>
+                );
 
             case GameOverReason.badBullshitCall:
-                return ( <>
-                    <p>{ this.props.losingPlayer.name } lost because they incorrectly called bullshit on { this.props.winningPlayer.name }.</p>
-                    <br />
-                    <p>Here are some words that start with { this.props.gameString }:</p>
-                    <ol>
-                        { this.props.possibleWordList.map( word =>
-                        {
-                            return ( <li key={ word }>
-                                <RemovableWord
-                                    word={ word }
-                                    handleRemoveWord={ this.props.addToBlacklist }
-                                />
-                            </li> );
-                        } ) }
-                    </ol>
-                </> );
+                return (
+                    <>
+                        <p>{ this.props.losingPlayer.name } lost because they incorrectly called bullshit on { this.props.winningPlayer.name }.</p>
+                        <br />
+                        { this.props.rebuttalWord && <p>{ this.props.winningPlayer.name } won because they successfully rebutted with the word "{ this.props.rebuttalWord }"</p> }
+                        <p>Here are some words that start with "{ this.props.gameString }":</p>
+                        <ol>
+                            { this.props.possibleWordList.map( word =>
+                            {
+                                return ( <li key={ word }>
+                                    <RemovableWord
+                                        word={ word }
+                                        handleRemoveWord={ this.props.addToBlacklist }
+                                    />
+                                </li> );
+                            } ) }
+                        </ol>
+                    </>
+                );
 
             default:
                 console.log( this.props );

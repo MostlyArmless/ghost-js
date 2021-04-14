@@ -13,4 +13,11 @@ export enum WordRecognitionMode
     ManualCallBullshit
 }
 
+export enum eGameActions
+{
+    AppendLetter,
+    PrependLetter,
+    CallBullshit
+}
+
 export const ENTER_KEY_CODE = 13;

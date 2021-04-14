@@ -1,4 +1,5 @@
 import { API } from "./API";
+import { eGameActions } from "./constants";
 import { chooseRandomLetter, getRandomElementFromArray } from "./tools";
 
 export class RoboPlayer
@@ -10,10 +11,28 @@ export class RoboPlayer
         this.API = API;
     }
 
-    chooseNextLetter = async ( gameString: string ) =>
+    private shouldCallBullshit = async ( gameString: string ): Promise<boolean> =>
+    {
+        const possibleWords = await this.API.getPossibleWords( gameString ); // TODO implement "countPossibleWords" in the API to avoid having to actually request all the words
+        if ( possibleWords.length === 0 )
+            return true;
+
+        return false;
+    }
+
+    decideNextMove = async ( gameString: string ): Promise<eGameActions> =>
+    {
+        if ( await this.shouldCallBullshit( gameString ) )
+            return eGameActions.CallBullshit;
+        else
+            return eGameActions.AppendLetter;
+        // TODO - implement prependLetter logic
+    }
+
+    chooseLetterToAppend = async ( gameString: string ) =>
     {
         // AI will choose the next letter based on the current string
-        console.log( `Taking AI turn, with current string = "${gameString}"...` );
+        console.log( `Choosing letter for AI to append, with current string = "${gameString}"...` );
         let nextLetter = "";
 
         let possibleWordList: string[] = [];

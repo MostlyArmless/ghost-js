@@ -15,27 +15,25 @@ interface NewGameProps
     handleStartClicked(): void;
     reset(): void;
     handleSettingsClicked(): void;
-    invalidPlayerNames: boolean;
-    getBlacklist(): Promise<string[]>;
-    getWhitelist(): Promise<string[]>;
+    isAnyPlayerNameInvalid: boolean;
+    whitelistedWords: string[];
+    blacklistedWords: string[];
     handleHelp(): void;
     clearBlacklist(): Promise<void>;
     clearWhitelist(): Promise<void>;
+    refreshBlacklist(): Promise<void>;
+    refreshWhitelist(): Promise<void>;
 }
 
 interface NewGameState
 {
     blacklistVisible: boolean;
     whitelistVisible: boolean;
-    blacklist: string[];
-    whitelist: string[];
 }
 
 const initialState: NewGameState = {
     blacklistVisible: false,
     whitelistVisible: false,
-    blacklist: [],
-    whitelist: []
 }
 
 export class NewGame extends React.Component<NewGameProps, NewGameState> {
@@ -46,42 +44,23 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
         this.state = initialState;
     }
 
-    clearBlacklist = async () =>
-    {
-        await this.props.clearBlacklist();
-        this.setState( {
-            blacklist: await this.props.getBlacklist()
-        } );
-    }
-
-    clearWhitelist = async () =>
-    {
-        await this.props.clearWhitelist();
-        this.setState( {
-            whitelist: await this.props.getWhitelist()
-        } );
-    }
-
-    async componentWillMount()
-    {
-        this.setState( {
-            blacklist: await this.props.getBlacklist(),
-            whitelist: await this.props.getWhitelist()
-        } );
-    }
-
-    toggleBlacklistVisibility = () =>
+    toggleBlacklistVisibility = async () =>
     {
         this.setState( ( previousState ) =>
         {
+            if ( !previousState.blacklistVisible )
+                this.props.refreshBlacklist();
+
             return { blacklistVisible: !previousState.blacklistVisible };
         } );
     }
 
-    toggleWhitelistVisibility = () =>
+    toggleWhitelistVisibility = async () =>
     {
         this.setState( ( previousState ) =>
         {
+            if ( !previousState.whitelistVisible )
+                this.props.refreshWhitelist();
             return { whitelistVisible: !previousState.whitelistVisible };
         } );
     }
@@ -103,43 +82,43 @@ export class NewGame extends React.Component<NewGameProps, NewGameState> {
 
     private buildBlacklist()
     {
-        const button = this.state.blacklist.length > 0 &&
+        const button = this.props.blacklistedWords.length > 0 &&
             <Button
                 text='Clear Blacklist'
-                onClick={ this.clearBlacklist }
+                onClick={ this.props.clearBlacklist }
             />
 
         return (
             <>
                 <h2>Blacklisted words:</h2>
                 { button }
-                { this.state.blacklist.length > 0 ? <NumberedList data={ this.state.blacklist } /> : <p>No words have been blacklisted yet.</p> }
+                { this.props.blacklistedWords.length > 0 ? <NumberedList data={ this.props.blacklistedWords } /> : <p>No words have been blacklisted yet.</p> }
             </>
         );
     }
 
     private buildWhitelist()
     {
-        const shouldShow = this.state.whitelist.length > 0;
+        const shouldShow = this.props.whitelistedWords.length > 0;
 
         const button = shouldShow &&
             <Button
                 text='Clear Whitelist'
-                onClick={ this.clearWhitelist }
+                onClick={ this.props.clearWhitelist }
             />
 
         return (
             <>
                 <h2>Whitelisted words:</h2>
                 { button }
-                { this.state.whitelist.length > 0 ? <NumberedList data={ this.state.whitelist } /> : <p>No words have been added to the dictionary yet.</p> }
+                { this.props.whitelistedWords.length > 0 ? <NumberedList data={ this.props.whitelistedWords } /> : <p>No words have been added to the dictionary yet.</p> }
             </>
         );
     }
 
     render()
     {
-        const invalidPlayerWarning = this.props.invalidPlayerNames && <h2>Player names must be unique and non-blank</h2>
+        const invalidPlayerWarning = this.props.isAnyPlayerNameInvalid && <h2>Player names must be unique and non-blank</h2>
 
         const playerList = this.buildPlayerList();
         const blacklist = this.state.blacklistVisible && this.buildBlacklist();
