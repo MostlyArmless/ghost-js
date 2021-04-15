@@ -259,7 +259,7 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( {
             invalidPlayerNames: false,
             currentPage: "Play"
-        } );
+        }, this.takeAiTurnIfNeeded );
     };
 
     handleRenamePlayer = ( index: number, newName: string ) =>
