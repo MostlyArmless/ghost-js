@@ -131,7 +131,7 @@ class App extends React.Component<AppProps, AppState> {
         const updatedGameString = this.state.gameString + this.state.nextChar;
 
         // Ask the server for a list of all words that start with the current game string
-        if ( this.gameStringAboveMinLength( updatedGameString ) )
+        if ( this.gameStringIsLongEnough( updatedGameString ) )
         {
             const possibleWordList = await this.API.getPossibleWords( updatedGameString, this.savePossibleWordListToState );
             if ( possibleWordList.includes( updatedGameString ) )
@@ -423,7 +423,8 @@ class App extends React.Component<AppProps, AppState> {
 
         this.setState( { rebuttalWord: rebuttalWord }, async () =>
         {
-            if ( await this.API.checkForWord( rebuttalWord, this.getGameSettingValue( "minWordLength" ) as number ) )
+            const minWordLength = this.getGameSettingValue( "minWordLength" ) as number;
+            if ( rebuttalWord.length >= minWordLength && await this.API.checkForWord( rebuttalWord ) )
             {
                 // The word is in the dictionary, so the BS-caller loses
                 this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
@@ -479,9 +480,9 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( { blacklistedWords: updatedBlacklist } );
     }
 
-    private gameStringAboveMinLength( updatedGameString: string ): boolean
+    private gameStringIsLongEnough( updatedGameString: string ): boolean
     {
-        return updatedGameString.length > this.getGameSettingValue( 'minWordLength' );
+        return updatedGameString.length >= this.getGameSettingValue( 'minWordLength' );
     }
 
     handleHelp = () =>

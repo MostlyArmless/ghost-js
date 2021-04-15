@@ -22,13 +22,8 @@ export class API
         }
     }
 
-    async checkForWord( testWord: string, minWordLength: number ): Promise<boolean>
+    async checkForWord( testWord: string ): Promise<boolean>
     {
-        if ( testWord.length < minWordLength )
-        {
-            return false;
-        }
-
         try
         {
             const response = await window.fetch( `${serverUrl}/isword/${testWord}` );

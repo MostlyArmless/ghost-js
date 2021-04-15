@@ -17,7 +17,7 @@ interface GameOverProps
     handleNewGame(): void;
     addToBlacklist( word: string ): void;
     addToWhitelist( word: string ): void;
-    isWordInDictionary( testWord: string, minWordLength: number ): Promise<boolean>;
+    isWordInDictionary( testWord: string ): Promise<boolean>;
 }
 
 interface GameOverState
@@ -60,7 +60,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
             alert( "Can't add blank word to dictionary" );
             return;
         }
-        if ( await this.props.isWordInDictionary( word, 50 ) )
+        if ( await this.props.isWordInDictionary( word ) )
         {
             alert( "This word is already in the dictionary!" );
             return;
