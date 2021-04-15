@@ -97,16 +97,13 @@ export function NewGame( props: NewGameProps )
         );
     }
 
-    const invalidPlayerWarning = props.isAnyPlayerNameInvalid && <h2>Player names must be unique and non-blank</h2>
-
-    const playerList = buildPlayerList();
-    const blacklist = isBlacklistVisible && buildBlacklist();
-    const whitelist = isWhitelistVisible && buildWhitelist();
-
     return (
         <div className='newGame'>
             <h2>New Game</h2>
-            { invalidPlayerWarning }
+            {
+                props.isAnyPlayerNameInvalid &&
+                <h2>Player names must be unique and non-blank</h2>
+            }
             <Button
                 onClick={ props.reset }
                 text='Reset Game'
@@ -125,7 +122,7 @@ export function NewGame( props: NewGameProps )
                 text="Help"
             />
             <fieldset>
-                { playerList }
+                { buildPlayerList() }
                 <Button
                     onClick={ props.handleAddPlayer }
                     text='Add Player'
@@ -140,8 +137,8 @@ export function NewGame( props: NewGameProps )
                 onClick={ toggleWhitelistVisibility }
                 text={ isWhitelistVisible ? 'Hide Whitelist' : 'Show Whitelist' }
             />
-            { blacklist }
-            { whitelist }
+            { isBlacklistVisible && buildBlacklist() }
+            { isWhitelistVisible && buildWhitelist() }
         </div>
     );
 }
