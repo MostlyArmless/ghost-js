@@ -114,7 +114,7 @@ export class GameOver extends React.Component<GameOverProps, GameOverState>
                 return (
                     <>
                         <p>{ this.props.losingPlayer.name } lost because { this.props.winningPlayer.name } correctly called bullshit on them.<br />There are no words that start with "{ this.props.gameString }"</p>
-                        {this.props.rebuttalWord && <p>"{ this.props.rebuttalWord }" is the word that { this.props.losingPlayer } responded with when challenged, but it is NOT a valid word.</p> }
+                        {this.props.rebuttalWord && <p>"{ this.props.rebuttalWord }" is NOT a valid word.</p> }
                     </>
                 );
 
