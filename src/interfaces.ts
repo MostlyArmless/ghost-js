@@ -1,9 +1,12 @@
 export type PlayerType = "AI" | "Human";
 
+export type DifficultyLevel = "N/A" | "Easy" | "Hard";
+
 export interface IPlayer
 {
     name: string;
     type: PlayerType;
+    aiDifficulty: DifficultyLevel
 }
 
 export interface ISetting

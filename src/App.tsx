@@ -6,7 +6,7 @@ import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { eGameActions, GameOverReason } from "./constants";
-import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage } from "./interfaces";
+import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage, DifficultyLevel } from "./interfaces";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
@@ -35,8 +35,8 @@ interface AppState
 }
 
 const initialPlayers: IPlayer[] = [
-    { name: "Mike", type: "Human" },
-    { name: "Borg", type: "AI" }
+    { name: "Mike", type: "Human", aiDifficulty: "N/A" },
+    { name: "Borg", type: "AI", aiDifficulty: "Easy" }
 ];
 
 const initialState: AppState = {
@@ -83,6 +83,19 @@ const initialState: AppState = {
     blacklistedWords: []
 };
 
+const newGameState: Partial<AppState> = {
+    currentPage: "NewGame",
+    previousPage: "Startup",
+    nextChar: initialState.nextChar,
+    gameString: initialState.gameString,
+    currentPlayerIndex: initialState.currentPlayerIndex,
+    gameOverReason: initialState.gameOverReason,
+    loser: initialState.loser,
+    winner: initialState.winner,
+    waitingForAiToChooseLetter: initialState.waitingForAiToChooseLetter,
+    rebuttalWord: initialState.rebuttalWord,
+}
+
 class App extends React.Component<AppProps, AppState> {
     API: API;
     roboPlayer: RoboPlayer;
@@ -92,7 +105,7 @@ class App extends React.Component<AppProps, AppState> {
         super( props );
         this.state = initialState;
         this.API = new API();
-        this.roboPlayer = new RoboPlayer( this.API );
+        this.roboPlayer = new RoboPlayer( this.API, "Hard", 2 ); // TODO default this to Easy instead
     }
 
     getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
@@ -228,9 +241,14 @@ class App extends React.Component<AppProps, AppState> {
 
     handleNewGame = () =>
     {
-        let newGameState = initialState;
-        newGameState.currentPage = 'NewGame';
-        this.setState( newGameState );
+        console.log( `Returning to NewGame screen` );
+        this.setState( ( prevState ) =>
+        {
+            return {
+                ...prevState,
+                ...newGameState
+            };
+        } );
     }
 
     handleNextCharChange = ( event: any ) =>
@@ -255,6 +273,8 @@ class App extends React.Component<AppProps, AppState> {
             }
             names.add( name );
         }
+
+        this.roboPlayer.reset();
 
         this.setState( {
             invalidPlayerNames: false,
@@ -302,6 +322,17 @@ class App extends React.Component<AppProps, AppState> {
         } );
     };
 
+    handleChangeRoboDifficulty = ( difficulty: DifficultyLevel ) =>
+    {
+        this.roboPlayer.setDifficultyLevel( difficulty );
+        this.setState( prevState =>
+        {
+            const updatedPlayers = prevState.players;
+            updatedPlayers[1].aiDifficulty = difficulty; // TODO this assumes the AI player is always in the same slot
+            return { players: updatedPlayers }
+        } );
+    }
+
     setGameSetting = ( settingName: GameSettingKey, value: number | string | boolean ) =>
     {
         const validSettings = this.getGameSettingValidOptions( settingName );
@@ -348,11 +379,15 @@ class App extends React.Component<AppProps, AppState> {
 
         this.setState( ( previousState: AppState ) =>
         {
+            const newNumPlayers = previousState.players.length + 1;
+            this.roboPlayer.setNumPlayers( newNumPlayers );
+
             return {
                 players: [...previousState.players,
                 {
                     name: "New Player",
-                    type: "Human"
+                    type: "Human",
+                    aiDifficulty: "N/A"
                 }]
             };
         } );
@@ -364,6 +399,8 @@ class App extends React.Component<AppProps, AppState> {
         {
             const players = previousState.players;
             players.splice( index, 1 );
+            const newNumPlayers = players.length;
+            this.roboPlayer.setNumPlayers( newNumPlayers );
             return {
                 players: players
             };
@@ -522,6 +559,7 @@ class App extends React.Component<AppProps, AppState> {
                         playerList={ this.state.players }
                         handleRenamePlayer={ this.handleRenamePlayer }
                         handleChangePlayerType={ this.handleChangePlayerType }
+                        handleChangeRoboDifficulty={ this.handleChangeRoboDifficulty }
                         handleRemovePlayer={ this.handleRemovePlayer }
                         handleStartClicked={ this.handleStartClicked }
                         isAnyPlayerNameInvalid={ this.state.invalidPlayerNames }
@@ -565,7 +603,7 @@ class App extends React.Component<AppProps, AppState> {
                         gameString={ this.state.gameString }
                         gameOverReason={ this.state.gameOverReason }
                         rebuttalWord={ this.state.rebuttalWord }
-                        handleNewGame={ this.resetGame }
+                        handleNewGame={ this.handleNewGame }
                         possibleWordList={ this.state.possibleWordList }
                         addToBlacklist={ this.API.blacklistWord }
                         addToWhitelist={ this.API.whitelistWord }

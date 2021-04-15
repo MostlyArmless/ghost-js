@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from './Button';
 import { NameField } from './NameField';
-import { IPlayer, PlayerType } from '../interfaces';
+import { DifficultyLevel, IPlayer, PlayerType } from '../interfaces';
 import { PlayerTypeSelect } from './PlayerTypeSelect';
 import { NumberedList } from './NumberedList';
 
@@ -10,6 +10,7 @@ interface NewGameProps
     playerList: IPlayer[];
     handleRenamePlayer( index: number, newName: string ): void;
     handleChangePlayerType( index: number, newType: PlayerType ): void;
+    handleChangeRoboDifficulty( difficulty: DifficultyLevel ): void;
     handleAddPlayer(): void;
     handleRemovePlayer( index: number ): void;
     handleStartClicked(): void;
@@ -55,9 +56,21 @@ export function NewGame( props: NewGameProps )
 
                 <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ props.handleChangePlayerType } />
 
+                {player.type === "AI" &&
+                    <>
+                        <select
+                            value={ player.aiDifficulty }
+                            onChange={ ( event ) => props.handleChangeRoboDifficulty( event.target.value as DifficultyLevel ) }
+                        >
+                            <option value={ 'Easy' }>Easy</option>
+                            <option value={ 'Hard' }>Hard</option>
+                        </select>
+                    </>
+                }
+
                 { id > 1 &&
                     <Button key={ id + '_button' } id={ id } onClick={ props.handleRemovePlayer } text='Remove Player' /> }
-            </div> );
+            </div > );
         } );
     }
 
