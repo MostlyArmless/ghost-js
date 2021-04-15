@@ -530,8 +530,8 @@ class App extends React.Component<AppProps, AppState> {
                         blacklistedWords={ this.state.blacklistedWords }
                         whitelistedWords={ this.state.whitelistedWords }
                         handleHelp={ this.handleHelp }
-                        clearBlacklist={ async () => { await this.API.clearBlacklist(); this.setState( { blacklistedWords: [] } ); } }
-                        clearWhitelist={ async () => { await this.API.clearWhitelist(); this.setState( { whitelistedWords: [] } ); } }
+                        clearBlacklist={ async () => { this.API.clearBlacklist(); this.setState( { blacklistedWords: [] } ); } }
+                        clearWhitelist={ async () => { this.API.clearWhitelist(); this.setState( { whitelistedWords: [] } ); } }
                         refreshBlacklist={ this.refreshBlacklist }
                         refreshWhitelist={ this.refreshWhitelist }
                     />
