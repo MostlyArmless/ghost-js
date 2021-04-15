@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { IPlayer } from '../interfaces';
 import { TextboxAndButton } from './TextboxAndButton';
 
@@ -10,47 +9,31 @@ interface PromptUserForWordProps
     handleSubmitWord( word: string ): void;
 }
 
-interface PromptUserForWordState
+export function PromptUserForWord( props: PromptUserForWordProps )
 {
-}
-
-const initialState: PromptUserForWordState = {
-}
-
-export class PromptUserForWord extends React.Component<PromptUserForWordProps, PromptUserForWordState>
-{
-    constructor( props: PromptUserForWordProps )
+    const handleSubmitWord = ( word: string ): void =>
     {
-        super( props );
-        this.state = initialState;
-    }
-
-    handleSubmitWord = ( word: string ): void =>
-    {
-        if ( !word.startsWith( this.props.gameString ) )
+        if ( !word.startsWith( props.gameString ) )
         {
-            alert( `Please submit a word that starts with "${this.props.gameString}"` );
+            alert( `Please submit a word that starts with "${props.gameString}"` );
             return;
         }
 
-        this.props.handleSubmitWord( word );
+        props.handleSubmitWord( word );
     }
 
-    render()
-    {
-        return (
-            <>
-                <h2>🐄💩</h2>
-                <p>
-                    { this.props.currentPlayer.name } has called bullshit on { this.props.previousPlayer.name }.
+    return (
+        <>
+            <h2>🐄💩</h2>
+            <p>
+                { props.currentPlayer.name } has called bullshit on { props.previousPlayer.name }.
                 <br />
-                    { this.props.previousPlayer.name }, if you can enter a valid word that starts with "{ this.props.gameString }", then { this.props.currentPlayer.name } will be out of the game.
+                { props.previousPlayer.name }, if you can enter a valid word that starts with "{ props.gameString }", then { props.currentPlayer.name } will be out of the game.
                 </p>
-                <TextboxAndButton
-                    buttonText='Submit'
-                    onSubmit={ this.handleSubmitWord }
-                />
-            </>
-        );
-    }
+            <TextboxAndButton
+                buttonText='Submit'
+                onSubmit={ handleSubmitWord }
+            />
+        </>
+    );
 }
