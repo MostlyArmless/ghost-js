@@ -25,145 +25,123 @@ interface NewGameProps
     refreshWhitelist(): Promise<void>;
 }
 
-interface NewGameState
+export function NewGame( props: NewGameProps )
 {
-    blacklistVisible: boolean;
-    whitelistVisible: boolean;
-}
+    const [isBlacklistVisible, setIsBlacklistVisible] = React.useState( false );
+    const [isWhitelistVisible, setIsWhitelistVisible] = React.useState( false );
 
-const initialState: NewGameState = {
-    blacklistVisible: false,
-    whitelistVisible: false,
-}
-
-export class NewGame extends React.Component<NewGameProps, NewGameState> {
-
-    constructor( props: NewGameProps )
+    const toggleBlacklistVisibility = async () =>
     {
-        super( props );
-        this.state = initialState;
+        if ( !isBlacklistVisible )
+            await props.refreshBlacklist();
+
+        setIsBlacklistVisible( !isBlacklistVisible );
     }
 
-    toggleBlacklistVisibility = async () =>
+    const toggleWhitelistVisibility = async () =>
     {
-        this.setState( ( previousState ) =>
-        {
-            if ( !previousState.blacklistVisible )
-                this.props.refreshBlacklist();
+        if ( !isWhitelistVisible )
+            await props.refreshWhitelist();
 
-            return { blacklistVisible: !previousState.blacklistVisible };
-        } );
+        setIsWhitelistVisible( !isWhitelistVisible );
     }
 
-    toggleWhitelistVisibility = async () =>
+    const buildPlayerList = () =>
     {
-        this.setState( ( previousState ) =>
-        {
-            if ( !previousState.whitelistVisible )
-                this.props.refreshWhitelist();
-            return { whitelistVisible: !previousState.whitelistVisible };
-        } );
-    }
-
-    private buildPlayerList()
-    {
-        return this.props.playerList.map( ( player, id ) =>
+        return props.playerList.map( ( player, id ) =>
         {
             return ( <div key={ id + "_div" }>
-                <NameField playerName={ player.name } id={ id } handleChangeName={ this.props.handleRenamePlayer } />
+                <NameField playerName={ player.name } id={ id } handleChangeName={ props.handleRenamePlayer } />
 
-                <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ this.props.handleChangePlayerType } />
+                <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ props.handleChangePlayerType } />
 
                 { id > 1 &&
-                    <Button key={ id + '_button' } id={ id } onClick={ this.props.handleRemovePlayer } text='Remove Player' /> }
+                    <Button key={ id + '_button' } id={ id } onClick={ props.handleRemovePlayer } text='Remove Player' /> }
             </div> );
         } );
     }
 
-    private buildBlacklist()
+    const buildBlacklist = () =>
     {
-        const button = this.props.blacklistedWords.length > 0 &&
+        const button = props.blacklistedWords.length > 0 &&
             <Button
                 text='Clear Blacklist'
-                onClick={ this.props.clearBlacklist }
+                onClick={ props.clearBlacklist }
             />
 
         return (
             <>
                 <h2>Blacklisted words:</h2>
                 { button }
-                { this.props.blacklistedWords.length > 0 ? <NumberedList data={ this.props.blacklistedWords } /> : <p>No words have been blacklisted yet.</p> }
+                { props.blacklistedWords.length > 0 ? <NumberedList data={ props.blacklistedWords } /> : <p>No words have been blacklisted yet.</p> }
             </>
         );
     }
 
-    private buildWhitelist()
+    const buildWhitelist = () =>
     {
-        const shouldShow = this.props.whitelistedWords.length > 0;
+        const shouldShow = props.whitelistedWords.length > 0;
 
         const button = shouldShow &&
             <Button
                 text='Clear Whitelist'
-                onClick={ this.props.clearWhitelist }
+                onClick={ props.clearWhitelist }
             />
 
         return (
             <>
                 <h2>Whitelisted words:</h2>
                 { button }
-                { this.props.whitelistedWords.length > 0 ? <NumberedList data={ this.props.whitelistedWords } /> : <p>No words have been added to the dictionary yet.</p> }
+                { props.whitelistedWords.length > 0 ? <NumberedList data={ props.whitelistedWords } /> : <p>No words have been added to the dictionary yet.</p> }
             </>
         );
     }
 
-    render()
-    {
-        const invalidPlayerWarning = this.props.isAnyPlayerNameInvalid && <h2>Player names must be unique and non-blank</h2>
+    const invalidPlayerWarning = props.isAnyPlayerNameInvalid && <h2>Player names must be unique and non-blank</h2>
 
-        const playerList = this.buildPlayerList();
-        const blacklist = this.state.blacklistVisible && this.buildBlacklist();
-        const whitelist = this.state.whitelistVisible && this.buildWhitelist();
+    const playerList = buildPlayerList();
+    const blacklist = isBlacklistVisible && buildBlacklist();
+    const whitelist = isWhitelistVisible && buildWhitelist();
 
-        return (
-            <div className='newGame'>
-                <h2>New Game</h2>
-                { invalidPlayerWarning }
+    return (
+        <div className='newGame'>
+            <h2>New Game</h2>
+            { invalidPlayerWarning }
+            <Button
+                onClick={ props.reset }
+                text='Reset Game'
+            />
+            <Button
+                className='startGame'
+                onClick={ props.handleStartClicked }
+                text='Start Game'
+            />
+            <Button
+                onClick={ props.handleSettingsClicked }
+                text='Settings'
+            />
+            <Button
+                onClick={ props.handleHelp }
+                text="Help"
+            />
+            <fieldset>
+                { playerList }
                 <Button
-                    onClick={ this.props.reset }
-                    text='Reset Game'
+                    onClick={ props.handleAddPlayer }
+                    text='Add Player'
                 />
-                <Button
-                    className='startGame'
-                    onClick={ this.props.handleStartClicked }
-                    text='Start Game'
-                />
-                <Button
-                    onClick={ this.props.handleSettingsClicked }
-                    text='Settings'
-                />
-                <Button
-                    onClick={ this.props.handleHelp }
-                    text="Help"
-                />
-                <fieldset>
-                    { playerList }
-                    <Button
-                        onClick={ this.props.handleAddPlayer }
-                        text='Add Player'
-                    />
-                </fieldset>
+            </fieldset>
 
-                <Button
-                    onClick={ this.toggleBlacklistVisibility }
-                    text={ this.state.blacklistVisible ? 'Hide Blacklist' : 'Show Blacklist' }
-                />
-                <Button
-                    onClick={ this.toggleWhitelistVisibility }
-                    text={ this.state.whitelistVisible ? 'Hide Whitelist' : 'Show Whitelist' }
-                />
-                { blacklist }
-                { whitelist }
-            </div>
-        );
-    }
+            <Button
+                onClick={ toggleBlacklistVisibility }
+                text={ isBlacklistVisible ? 'Hide Blacklist' : 'Show Blacklist' }
+            />
+            <Button
+                onClick={ toggleWhitelistVisibility }
+                text={ isWhitelistVisible ? 'Hide Whitelist' : 'Show Whitelist' }
+            />
+            { blacklist }
+            { whitelist }
+        </div>
+    );
 }
