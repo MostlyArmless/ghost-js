@@ -105,7 +105,7 @@ export function NewGame( props: NewGameProps )
             <>
                 <h2>Whitelisted words:</h2>
                 { button }
-                { props.whitelistedWords.length > 0 ? <NumberedList data={ props.whitelistedWords } /> : <p>No words have been added to the dictionary yet.</p> }
+                { props.whitelistedWords.length > 0 ? <NumberedList data={ props.whitelistedWords } /> : <p>No words have been added to the custom dictionary yet.</p> }
             </>
         );
     }
