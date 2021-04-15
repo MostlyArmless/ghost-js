@@ -56,7 +56,7 @@ export class Startup extends React.Component<StartupProps, StartupState>
         let message;
         if ( this.state.serverCannotBeReached )
         {
-            message = <p>Server cannot be reached. Try reloading this page.</p>
+            message = <p>Server didn't respond within the timeout. Try refreshing the page.</p>
         }
         else if ( this.state.serverIsLoaded )
         {
@@ -66,7 +66,7 @@ export class Startup extends React.Component<StartupProps, StartupState>
         }
         else
         {
-            message = <p>Waiting for Heroku server to come online...</p>;
+            message = <p>Waiting for Heroku ghost-word-server to come online...</p>;
         }
 
         return (
