@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { GameSetting } from './GameSetting';
 import { GameSettings, GameSettingKey } from '../interfaces';
 
@@ -9,44 +8,36 @@ interface GameSettingsPageProps
   handleSettingsDoneClicked(): void;
 }
 
-interface GameSettingsPageState
+export function GameSettingsPage( props: GameSettingsPageProps )
 {
+  let settings: any[] = [];
 
-}
-
-export class GameSettingsPage extends React.Component<GameSettingsPageProps, GameSettingsPageState> {
-
-  render()
+  for ( let settingKey in props.gameSettings )
   {
-    let settings: any[] = [];
-
-    for ( let settingKey in this.props.gameSettings )
+    if ( props.gameSettings.hasOwnProperty( settingKey ) )
     {
-      if ( this.props.gameSettings.hasOwnProperty( settingKey ) )
-      {
-        const item = this.props.gameSettings[settingKey];
-        settings.push(
-          <GameSetting
-            key={ item.settingKey }
-            settingKey={ item.settingKey }
-            settingTitle={ item.title }
-            value={ item.value }
-            options={ item.options }
-            handleChangeGameSetting={ this.props.handleChangeGameSetting }
-          /> );
-      }
+      const item = props.gameSettings[settingKey];
+      settings.push(
+        <GameSetting
+          key={ item.settingKey }
+          settingKey={ item.settingKey }
+          settingTitle={ item.title }
+          value={ item.value }
+          options={ item.options }
+          handleChangeGameSetting={ props.handleChangeGameSetting }
+        /> );
     }
-
-    return (
-      <>
-        <h2>Game Settings</h2>
-        <table className='center'>
-          <tbody>
-            { settings }
-          </tbody>
-        </table>
-        <button onClick={ this.props.handleSettingsDoneClicked }>Done</button>
-      </>
-    );
   }
+
+  return (
+    <>
+      <h2>Game Settings</h2>
+      <table className='center'>
+        <tbody>
+          { settings }
+        </tbody>
+      </table>
+      <button onClick={ props.handleSettingsDoneClicked }>Done</button>
+    </>
+  );
 }
