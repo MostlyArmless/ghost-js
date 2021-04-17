@@ -48,7 +48,7 @@ export class RoboPlayer
         // TODO - implement prependLetter logic
     }
 
-    private getWordThatWillLetRobotWin( gameString: string, possibleWordList: string[] ): string
+    private getWordThatWillLetRobotWinAppendOnlyMode( gameString: string, possibleWordList: string[] ): string
     {
         const numAdditionalWordLengthsToConsider = 5;
         const wordLengthsThatWillMakeMeLose: number[] = new Array( numAdditionalWordLengthsToConsider )
@@ -77,10 +77,10 @@ export class RoboPlayer
 
         let nextLetter = "";
 
-        const possibleWordList = await this.API.getPossibleWords( gameString );
+        const possibleWordList = await this.API.getAllWordsEndingWith( gameString );
 
         // If we haven't chosen a target word yet, choose it now.
-        if ( this.targetWord.length === 0 )
+        if ( this.targetWord?.length === 0 )
             this.targetWord = getRandomElementFromArray( possibleWordList );
 
         if ( possibleWordList.length > 0 )
@@ -91,7 +91,7 @@ export class RoboPlayer
                 if ( this.difficulty === "Easy" )
                     this.targetWord = getRandomElementFromArray( possibleWordList );
                 else if ( this.difficulty === "Hard" )
-                    this.targetWord = this.getWordThatWillLetRobotWin( gameString, possibleWordList );
+                    this.targetWord = this.getWordThatWillLetRobotWinAppendOnlyMode( gameString, possibleWordList );
 
             }
 
@@ -109,6 +109,53 @@ export class RoboPlayer
         else
         {
             // AI realizes it can't do anything so it'll try to BS with a random letter
+            nextLetter = chooseRandomLetter();
+            console.log( `AI can't think of any words, bullshitting with letter '${nextLetter}'` );
+        }
+
+        return nextLetter;
+    };
+
+    chooseLetterToPrepend = async ( gameString: string ) =>
+    {
+        // AI will choose the next letter based on the current string
+        console.log( `Choosing letter for ${this.difficulty} AI to prepend, with current string = "${gameString}"...` );
+        if ( gameString.length === 0 )
+            return chooseRandomLetter();
+
+        let nextLetter = "";
+
+        const possibleWordList = await this.API.getAllWordsStartingWith( gameString );
+
+        // If we haven't chosen a target word yet, choose it now.
+        if ( this.targetWord?.length === 0 )
+            this.targetWord = getRandomElementFromArray( possibleWordList );
+
+        if ( possibleWordList.length > 0 )
+        {
+            if ( !possibleWordList.includes( this.targetWord ) )
+            {
+                // Our previous target word is no longer valid, we need a new target word
+                if ( this.difficulty === "Easy" )
+                    this.targetWord = getRandomElementFromArray( possibleWordList );
+                else if ( this.difficulty === "Hard" )
+                    this.targetWord = this.getWordThatWillLetRobotWinAppendOnlyMode( gameString, possibleWordList );
+
+            }
+
+            nextLetter = this.targetWord[gameString.length];
+            if ( nextLetter === undefined )
+            {
+                nextLetter = chooseRandomLetter();
+                console.log( `AI failed to choose a valid letter when aiming for target word "${this.targetWord}". overriding with random letter '${nextLetter}'` );
+            }
+            else
+            {
+                console.log( `AI aiming for target word "${this.targetWord}". Submitting next letter '${nextLetter}'` );
+            }
+        }
+        else
+        {
             nextLetter = chooseRandomLetter();
             console.log( `AI can't think of any words, bullshitting with letter '${nextLetter}'` );
         }

@@ -1,6 +1,7 @@
 import { timeoutPromise } from "./tools";
 
 const serverUrl = process.env.NODE_ENV === "production" ? "https://ghost-word-server.herokuapp.com" : "http://localhost:3001";
+type WordLookupType = "wordsstartingwith" | "wordsendingwith" | "wordscontaining";
 
 // Communicate with the ghost-word-server to check if words exist, get list of possible words given the current string, etc.
 export class API
@@ -22,7 +23,7 @@ export class API
         }
     }
 
-    async checkForWord( testWord: string ): Promise<boolean>
+    async isWord( testWord: string ): Promise<boolean>
     {
         try
         {
@@ -37,11 +38,26 @@ export class API
         }
     }
 
-    async getPossibleWords( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    async getAllWordsContaining( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    {
+        return this.getWords( wordPart, "wordscontaining", saveToState );
+    }
+
+    async getAllWordsStartingWith( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    {
+        return this.getWords( wordPart, "wordsstartingwith", saveToState );
+    }
+
+    async getAllWordsEndingWith( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    {
+        return this.getWords( wordPart, "wordsendingwith", saveToState );
+    }
+
+    private async getWords( wordPart: string, lookupType: WordLookupType, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
     {
         try
         {
-            const response = await window.fetch( `${serverUrl}/possiblewords/${wordPart}` );
+            const response = await window.fetch( `${serverUrl}/${lookupType}/${wordPart}` );
             const possibleWordList = await response.json();
             if ( saveToState !== undefined )
                 saveToState( possibleWordList );
