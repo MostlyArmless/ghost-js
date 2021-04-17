@@ -54,6 +54,21 @@ export class API
         }
     }
 
+    async countPossibleWords( wordPart: string ): Promise<number>
+    {
+        try
+        {
+            const response = await window.fetch( `${serverUrl}/countpossiblewords/${wordPart}` );
+            const numPossibleWords = await response.json();
+            return numPossibleWords;
+        }
+        catch ( error )
+        {
+            console.error( error );
+            return 0;
+        }
+    }
+
     async getBlacklist(): Promise<string[]>
     {
         try

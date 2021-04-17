@@ -35,11 +35,8 @@ export class RoboPlayer
 
     private shouldCallBullshit = async ( gameString: string ): Promise<boolean> =>
     {
-        const possibleWords = await this.API.getPossibleWords( gameString ); // TODO implement "countPossibleWords" in the API to avoid having to actually request all the words
-        if ( possibleWords.length === 0 )
-            return true;
-
-        return false;
+        const numPossibleWords = await this.API.countPossibleWords( gameString );
+        return numPossibleWords === 0;
     }
 
     decideNextMove = async ( gameString: string ): Promise<eGameActions> =>
