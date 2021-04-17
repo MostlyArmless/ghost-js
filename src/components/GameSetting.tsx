@@ -10,36 +10,28 @@ interface GameSettingProps
     handleChangeGameSetting( settingName: GameSettingKey, newValue: number | string ): void;
 }
 
-interface GameSettingState
+export function GameSetting( props: GameSettingProps )
 {
-
-}
-
-export class GameSetting extends React.Component<GameSettingProps, GameSettingState> {
-
-    handleChangeGameSetting = ( event: any ) =>
+    const handleChangeGameSetting = ( event: any ) =>
     {
-        this.props.handleChangeGameSetting( this.props.settingKey, event.target.value );
+        props.handleChangeGameSetting( props.settingKey, event.target.value );
     }
 
-    render()
+    const options = props.options.map( option =>
     {
-        const options = this.props.options.map( option =>
-        {
-            return <option key={ option } value={ option }>{ option }</option>
-        } );
+        return <option key={ option } value={ option }>{ option }</option>
+    } );
 
-        return (
-            <tr>
-                <td>{ this.props.settingTitle }</td>
-                <td>
-                    <select
-                        value={ this.props.value }
-                        onChange={ this.handleChangeGameSetting }>
-                        { options }
-                    </select>
-                </td>
-            </tr>
-        );
-    }
+    return (
+        <tr>
+            <td>{ props.settingTitle }</td>
+            <td>
+                <select
+                    value={ props.value }
+                    onChange={ handleChangeGameSetting }>
+                    { options }
+                </select>
+            </td>
+        </tr>
+    );
 }
