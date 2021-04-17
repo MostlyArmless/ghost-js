@@ -139,26 +139,32 @@ class App extends React.Component<AppProps, AppState> {
         this.setState( { possibleWordList: possibleWordList } );
     }
 
-    commitNextChar = async () =>
+    commitPrependChar = async (): Promise<void> =>
+    {
+        const updatedGameString = this.state.nextChar + this.state.gameString;
+        this.commitNextChar( updatedGameString );
+    }
+
+    commitAppendChar = async (): Promise<void> =>
     {
         const updatedGameString = this.state.gameString + this.state.nextChar;
+        this.commitNextChar( updatedGameString );
+    }
 
-        // Ask the server for a list of all words that start with the current game string
+    // Don't call this directly, only call it via commitPrependChar or commitAppendChar
+    commitNextChar = async ( updatedGameString: string ): Promise<void> =>
+    {
         if ( this.gameStringIsLongEnough( updatedGameString ) )
         {
-            const possibleWordList = await this.API.getPossibleWords( updatedGameString, this.savePossibleWordListToState );
-            if ( possibleWordList.includes( updatedGameString ) )
+            if ( await this.API.isWord( updatedGameString ) )
             {
                 this.gameOver( updatedGameString, GameOverReason.finishedWord, this.getCurrentPlayer() );
                 return;
             }
-            else if ( possibleWordList.length === 0 )
+            else if ( this.state.gameSettings.wordRecognitionMode.value === "auto" && await this.API.countPossibleWords( updatedGameString ) === 0 )
             {
-                if ( this.state.gameSettings.wordRecognitionMode.value === "auto" )
-                {
-                    this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
-                    return;
-                }
+                this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
+                return;
             }
         }
 
@@ -182,13 +188,13 @@ class App extends React.Component<AppProps, AppState> {
             case eGameActions.AppendLetter:
                 {
                     const nextChar = await this.roboPlayer.chooseLetterToAppend( this.state.gameString );
-                    this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitNextChar );
+                    this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitAppendChar );
                     return
                 }
             case eGameActions.PrependLetter:
                 {
-                    // const nextChar = await this.roboPlayer.chooseLetterToPrepend( this.state.gameString );
-                    // TODO - implement prependLetter
+                    const nextChar = await this.roboPlayer.chooseLetterToPrepend( this.state.gameString );
+                    this.setState( { nextChar: nextChar, waitingForAiToChooseLetter: false }, this.commitPrependChar );
                     return
                 }
             default:
@@ -456,12 +462,12 @@ class App extends React.Component<AppProps, AppState> {
 
     handleSubmitBullshitRebuttal = async ( rebuttalWord: string ) =>
     {
-        await this.API.getPossibleWords( rebuttalWord, this.savePossibleWordListToState );
+        await this.API.getAllWordsEndingWith( rebuttalWord, this.savePossibleWordListToState );
 
         this.setState( { rebuttalWord: rebuttalWord }, async () =>
         {
             const minWordLength = this.getGameSettingValue( "minWordLength" ) as number;
-            if ( rebuttalWord.length >= minWordLength && await this.API.checkForWord( rebuttalWord ) )
+            if ( rebuttalWord.length >= minWordLength && await this.API.isWord( rebuttalWord ) )
             {
                 // The word is in the dictionary, so the BS-caller loses
                 this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
@@ -475,11 +481,12 @@ class App extends React.Component<AppProps, AppState> {
         } );
     }
 
+    // Somebody called bullshit on the robot player, we need to evaluate whether it was a good or bad bullshit call.
     resolveBullshitCallOnRobot = async () =>
     {
         try
         {
-            const possibleWordList = await this.API.getPossibleWords( this.state.gameString, this.savePossibleWordListToState );
+            const possibleWordList = await this.API.getAllWordsContaining( this.state.gameString );
             if ( possibleWordList.length > 0 )
             {
                 this.gameOver(
@@ -585,7 +592,8 @@ class App extends React.Component<AppProps, AppState> {
                         gameString={ this.state.gameString }
                         getCurrentPlayer={ this.getCurrentPlayer }
                         getPreviousPlayer={ this.getPreviousPlayer }
-                        commitNextChar={ this.commitNextChar }
+                        commitAppendChar={ this.commitAppendChar }
+                        commitPrependChar={ this.commitPrependChar }
                         possibleWordList={ this.state.possibleWordList }
                         handleCallBullshit={ this.handleCallBullshit }
                         handleExitGame={ this.resetGame }
@@ -607,7 +615,7 @@ class App extends React.Component<AppProps, AppState> {
                         possibleWordList={ this.state.possibleWordList }
                         addToBlacklist={ this.API.blacklistWord }
                         addToWhitelist={ this.API.whitelistWord }
-                        isWordInDictionary={ this.API.checkForWord }
+                        isWordInDictionary={ this.API.isWord }
                     />
                 );
                 break;

@@ -1,9 +1,7 @@
-import * as React from 'react';
 import { IPlayer } from '../interfaces';
 import { Spinner } from './Spinner';
 import { Button } from './Button'
 import * as _ from 'underscore';
-import { ENTER_KEY_CODE } from '../constants';
 import { NumberedList } from './NumberedList';
 
 export interface PlayProps
@@ -13,7 +11,8 @@ export interface PlayProps
     gameString: string;
     getCurrentPlayer(): IPlayer;
     getPreviousPlayer(): IPlayer;
-    commitNextChar(): void;
+    commitAppendChar(): void;
+    commitPrependChar(): void;
     possibleWordList: string[];
     handleCallBullshit(): void;
     handleExitGame(): void;
@@ -23,22 +22,29 @@ export interface PlayProps
 
 export function Play(props: PlayProps) {
 
-    const submitChar = () =>
+    const validateChar = (): boolean =>
     {
         if ( props.nextChar.length === 0 )
         {
             alert( "Can't submit a blank" );
-            return;
+            return false;
         }
-        props.commitNextChar();
-    }
-    
-    const onKeyDown = ( event: React.KeyboardEvent<HTMLInputElement> ) =>
-    {
-        if ( event.keyCode === ENTER_KEY_CODE )
-            submitChar();
+        return true;
     }
 
+    const appendChar = () =>
+    {
+        if (!validateChar())
+            return;
+        props.commitAppendChar();
+    }
+
+    const prependChar = () =>
+    {
+        if ( !validateChar() )
+            return;
+        props.commitPrependChar();
+    }
     
     const buildPossibleWordList = () =>
     {
@@ -57,15 +63,6 @@ export function Play(props: PlayProps) {
         )
     }
 
-    const possibleWordListForDisplay = props.displayWordList && buildPossibleWordList();
-
-    const bullshitButton = props.gameString.length > 0 &&
-        <Button
-            onClick={ props.handleCallBullshit }
-            text={ `Call Bullshit on ${props.getPreviousPlayer().name}` }
-            className="wideButton"
-        />;
-
     return (
         <>
             <h1>Ghost</h1>
@@ -81,20 +78,24 @@ export function Play(props: PlayProps) {
             />
 
             <p>Enter the next character:</p>
+            <Button
+                id={ 2 }
+                text="Prepend letter"
+                onClick={ prependChar }
+            />
             <input
                 autoComplete='off'
                 onChange={ props.handleNextCharChange }
                 type='text'
                 id='nextChar'
                 maxLength={ 1 }
-                onKeyDown={ onKeyDown }
                 value={ props.nextChar }
                 width={5}
             />
             <Button
             id={ 2 }
-            text="Submit letter"
-            onClick={submitChar}
+            text="Append letter"
+            onClick={appendChar}
             />
             <p>Game String:</p>
             <input
@@ -104,8 +105,13 @@ export function Play(props: PlayProps) {
                 id='gameString'
                 readOnly={ true }
             />
-            { bullshitButton }
-            { possibleWordListForDisplay }
+            { props.gameString.length > 0 &&
+                <Button
+                    onClick={ props.handleCallBullshit }
+                    text={ `Call Bullshit on ${props.getPreviousPlayer().name}` }
+                    className="wideButton"
+                /> }
+            { props.displayWordList && buildPossibleWordList() }
         </>
     );
 }
