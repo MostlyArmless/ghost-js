@@ -6,11 +6,13 @@ import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { eGameActions, GameOverReason } from "./constants";
-import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage, DifficultyLevel } from "./interfaces";
+import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage, DifficultyLevel, AppendOrPrependMode } from "./interfaces";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
 import { RoboPlayer } from "./RoboPlayer";
+
+const wordServerApi = new API();
 
 interface AppProps { }
 
@@ -32,11 +34,13 @@ interface AppState
     rebuttalWord: string;
     whitelistedWords: string[];
     blacklistedWords: string[];
+    getPossibleWords: ( gameString: string ) => Promise<string[]>;
+    countPossibleWords: ( gameString: string ) => Promise<number>;
 }
 
 const initialPlayers: IPlayer[] = [
     { name: "Mike", type: "Human", aiDifficulty: "N/A" },
-    { name: "Borg", type: "AI", aiDifficulty: "Easy" }
+    { name: "Borg", type: "AI", aiDifficulty: "Hard" }
 ];
 
 const initialState: AppState = {
@@ -68,6 +72,12 @@ const initialState: AppState = {
             title: "Show list of possible words in game",
             value: 'Hide',
             options: ['Show', 'Hide']
+        },
+        appendOrPrependMode: {
+            settingKey: 'appendOrPrependMode',
+            title: 'Rules for choosing next letter',
+            value: 'Append Only',
+            options: ['Append Only', 'Prepend Only'] // TODO - add "Append and Prepend" to this list when it is supported
         }
     },
     nextChar: "",
@@ -80,7 +90,9 @@ const initialState: AppState = {
     waitingForAiToChooseLetter: false,
     rebuttalWord: '',
     whitelistedWords: [],
-    blacklistedWords: []
+    blacklistedWords: [],
+    getPossibleWords: wordServerApi.getAllWordsEndingWith,
+    countPossibleWords: wordServerApi.countWordsEndingWith,
 };
 
 const newGameState: Partial<AppState> = {
@@ -97,15 +109,13 @@ const newGameState: Partial<AppState> = {
 }
 
 class App extends React.Component<AppProps, AppState> {
-    API: API;
     roboPlayer: RoboPlayer;
 
     constructor( props: AppProps )
     {
         super( props );
         this.state = initialState;
-        this.API = new API();
-        this.roboPlayer = new RoboPlayer( this.API, "Hard", 2 ); // TODO default this to Easy instead
+        this.roboPlayer = new RoboPlayer( wordServerApi, "Hard", 2 ); // TODO default this to Easy instead
     }
 
     getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
@@ -118,20 +128,22 @@ class App extends React.Component<AppProps, AppState> {
         return this.state.gameSettings[settingKey].value;
     }
 
-    gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: IPlayer, winner?: IPlayer )
+    async gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: IPlayer, winner?: IPlayer ): Promise<void>
     {
         console.log( `Game over because ${gameOverReason}...` );
-        this.setState( {
-            currentPage: "GameOver",
-            gameString: updatedGameString,
-            gameOverReason: gameOverReason,
-            loser: loser
-        } );
+        const possibleWords = await this.state.getPossibleWords( this.state.gameString );
 
-        if ( winner )
+        this.setState( prev =>
         {
-            this.setState( { winner: winner } );
-        }
+            return {
+                currentPage: "GameOver",
+                gameString: updatedGameString,
+                gameOverReason: gameOverReason,
+                winner: winner ?? prev.winner,
+                loser: loser,
+                possibleWordList: possibleWords
+            };
+        } );
     }
 
     savePossibleWordListToState = ( possibleWordList: string[] ) =>
@@ -141,12 +153,14 @@ class App extends React.Component<AppProps, AppState> {
 
     commitPrependChar = async (): Promise<void> =>
     {
+        console.log( `Player ${this.getCurrentPlayer().name} prepended "${this.state.nextChar}"` );
         const updatedGameString = this.state.nextChar + this.state.gameString;
         this.commitNextChar( updatedGameString );
     }
 
     commitAppendChar = async (): Promise<void> =>
     {
+        console.log( `Player ${this.getCurrentPlayer().name} appended "${this.state.nextChar}"` );
         const updatedGameString = this.state.gameString + this.state.nextChar;
         this.commitNextChar( updatedGameString );
     }
@@ -156,12 +170,12 @@ class App extends React.Component<AppProps, AppState> {
     {
         if ( this.gameStringIsLongEnough( updatedGameString ) )
         {
-            if ( await this.API.isWord( updatedGameString ) )
+            if ( await wordServerApi.isWord( updatedGameString ) )
             {
                 this.gameOver( updatedGameString, GameOverReason.finishedWord, this.getCurrentPlayer() );
                 return;
             }
-            else if ( this.state.gameSettings.wordRecognitionMode.value === "auto" && await this.API.countPossibleWords( updatedGameString ) === 0 )
+            else if ( this.state.gameSettings.wordRecognitionMode.value === "auto" && await this.state.countPossibleWords( updatedGameString ) === 0 )
             {
                 this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
                 return;
@@ -177,7 +191,7 @@ class App extends React.Component<AppProps, AppState> {
             return;
 
         this.setState( { waitingForAiToChooseLetter: true } );
-        const robotNextMove = await this.roboPlayer.decideNextMove( this.state.gameString );
+        const robotNextMove = await this.roboPlayer.decideNextMove( this.state.gameString, this.getGameSettingValue( "appendOrPrependMode" ) as AppendOrPrependMode );
         switch ( robotNextMove )
         {
             case eGameActions.CallBullshit:
@@ -365,11 +379,37 @@ class App extends React.Component<AppProps, AppState> {
 
         this.setState( ( previousState: AppState ) =>
         {
+            // TODO - extract this logic to a function
+            let updatedGetPossibleWords: ( gameString: string ) => Promise<string[]> = wordServerApi.getAllWordsStartingWith;
+            let updatedCountPossibleWords: ( gameString: string ) => Promise<number> = wordServerApi.countWordsStartingWith;
+
+            if ( settingName === "appendOrPrependMode" )
+            {
+                // Need to update the wordServer API lambdas stored in App.state
+                switch ( value as AppendOrPrependMode )
+                {
+                    case "Append Only":
+                        break; // Initialized to these values already
+                    case "Prepend Only":
+                        updatedGetPossibleWords = wordServerApi.getAllWordsEndingWith;
+                        updatedCountPossibleWords = wordServerApi.countWordsEndingWith;
+                        break;
+                    case "Append or Prepend":
+                        updatedGetPossibleWords = wordServerApi.getAllWordsContaining;
+                        updatedCountPossibleWords = wordServerApi.countWordsContaining;
+                        break;
+                    default:
+                        throw new Error( "Unhandled option" );
+                }
+            }
+
             let newSettings = previousState.gameSettings;
             newSettings[settingName].value = value;
             console.log( newSettings );
             return {
-                gameSettings: newSettings
+                gameSettings: newSettings,
+                getPossibleWords: settingName === "appendOrPrependMode" ? updatedGetPossibleWords : previousState.getPossibleWords,
+                countPossibleWords: settingName === "appendOrPrependMode" ? updatedCountPossibleWords : previousState.countPossibleWords,
             };
         } );
     };
@@ -438,7 +478,7 @@ class App extends React.Component<AppProps, AppState> {
     handleCallBullshit = async () =>
     {
         const mode = this.getGameSettingValue( "wordRecognitionMode" );
-        console.log( `handlCallBullshit` );
+        console.log( `handleCallBullshit` );
         if ( mode === "auto" || this.getPreviousPlayer().type === 'AI' )
         {
             await this.resolveBullshitCallOnRobot();
@@ -462,12 +502,10 @@ class App extends React.Component<AppProps, AppState> {
 
     handleSubmitBullshitRebuttal = async ( rebuttalWord: string ) =>
     {
-        await this.API.getAllWordsEndingWith( rebuttalWord, this.savePossibleWordListToState );
-
         this.setState( { rebuttalWord: rebuttalWord }, async () =>
         {
             const minWordLength = this.getGameSettingValue( "minWordLength" ) as number;
-            if ( rebuttalWord.length >= minWordLength && await this.API.isWord( rebuttalWord ) )
+            if ( rebuttalWord.length >= minWordLength && await wordServerApi.isWord( rebuttalWord ) )
             {
                 // The word is in the dictionary, so the BS-caller loses
                 this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
@@ -486,7 +524,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         try
         {
-            const possibleWordList = await this.API.getAllWordsContaining( this.state.gameString );
+            const possibleWordList = await this.state.getPossibleWords( this.state.gameString );
             if ( possibleWordList.length > 0 )
             {
                 this.gameOver(
@@ -514,13 +552,13 @@ class App extends React.Component<AppProps, AppState> {
 
     refreshWhitelist = async () =>
     {
-        const updatedWhitelist = await this.API.getWhitelist();
+        const updatedWhitelist = await wordServerApi.getWhitelist();
         this.setState( { whitelistedWords: updatedWhitelist } );
     }
 
     refreshBlacklist = async () =>
     {
-        const updatedBlacklist = await this.API.getBlacklist();
+        const updatedBlacklist = await wordServerApi.getBlacklist();
         this.setState( { blacklistedWords: updatedBlacklist } );
     }
 
@@ -554,7 +592,7 @@ class App extends React.Component<AppProps, AppState> {
             case "Startup":
                 page = (
                     <Startup
-                        waitForServerToComeOnline={ this.API.pingServer }
+                        waitForServerToComeOnline={ wordServerApi.pingServer }
                         handleNewGame={ this.handleNewGame }
                     />
                 );
@@ -576,8 +614,8 @@ class App extends React.Component<AppProps, AppState> {
                         blacklistedWords={ this.state.blacklistedWords }
                         whitelistedWords={ this.state.whitelistedWords }
                         handleHelp={ this.handleHelp }
-                        clearBlacklist={ async () => { this.API.clearBlacklist(); this.setState( { blacklistedWords: [] } ); } }
-                        clearWhitelist={ async () => { this.API.clearWhitelist(); this.setState( { whitelistedWords: [] } ); } }
+                        clearBlacklist={ async () => { wordServerApi.clearBlacklist(); this.setState( { blacklistedWords: [] } ); } }
+                        clearWhitelist={ async () => { wordServerApi.clearWhitelist(); this.setState( { whitelistedWords: [] } ); } }
                         refreshBlacklist={ this.refreshBlacklist }
                         refreshWhitelist={ this.refreshWhitelist }
                     />
@@ -599,6 +637,7 @@ class App extends React.Component<AppProps, AppState> {
                         handleExitGame={ this.resetGame }
                         displayWordList={ this.getGameSettingValue( "wordListInGame" ) === "Show" }
                         waitingForAiToChooseLetter={ this.state.waitingForAiToChooseLetter }
+                        appendOrPrependMode={ this.getGameSettingValue( "appendOrPrependMode" ) as AppendOrPrependMode }
                     />
                 );
                 break;
@@ -611,11 +650,12 @@ class App extends React.Component<AppProps, AppState> {
                         gameString={ this.state.gameString }
                         gameOverReason={ this.state.gameOverReason }
                         rebuttalWord={ this.state.rebuttalWord }
+                        appendOrPrependMode={ this.getGameSettingValue( "appendOrPrependMode" ) as AppendOrPrependMode }
                         handleNewGame={ this.handleNewGame }
                         possibleWordList={ this.state.possibleWordList }
-                        addToBlacklist={ this.API.blacklistWord }
-                        addToWhitelist={ this.API.whitelistWord }
-                        isWordInDictionary={ this.API.isWord }
+                        addToBlacklist={ wordServerApi.blacklistWord }
+                        addToWhitelist={ wordServerApi.whitelistWord }
+                        isWordInDictionary={ wordServerApi.isWord }
                     />
                 );
                 break;
