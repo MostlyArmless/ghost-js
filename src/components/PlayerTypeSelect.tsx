@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { PlayerType } from '../interfaces';
 
 interface PlayerTypeSelectProps
@@ -8,40 +7,22 @@ interface PlayerTypeSelectProps
   handleChangePlayerType( id: number, value: PlayerType ): void;
 }
 
-interface PlayerTypeSelectState
+export function PlayerTypeSelect( props: PlayerTypeSelectProps )
 {
-
-}
-
-const initialState: PlayerTypeSelectState = {
-
-}
-
-export class PlayerTypeSelect extends React.Component<PlayerTypeSelectProps, PlayerTypeSelectState> {
-
-  constructor( props: PlayerTypeSelectProps )
+  const handleChangePlayerType = ( event: any ) =>
   {
-    super( props );
-    this.state = initialState;
+    props.handleChangePlayerType( props.id, event.target.value );
   }
 
-  handleChangePlayerType = ( event: any ) =>
-  {
-    this.props.handleChangePlayerType( this.props.id, event.target.value );
-  }
-
-  render()
-  {
-    return (
-      <>
-        <select
-          value={ this.props.playerType }
-          onChange={ this.handleChangePlayerType }
-        >
-          <option value={ 'Human' }>Human</option>
-          <option value={ 'AI' }>AI</option>
-        </select>
-      </>
-    );
-  }
+  return (
+    <>
+      <select
+        value={ props.playerType }
+        onChange={ handleChangePlayerType }
+      >
+        <option value={ 'Human' }>Human</option>
+        <option value={ 'AI' }>AI</option>
+      </select>
+    </>
+  );
 }
