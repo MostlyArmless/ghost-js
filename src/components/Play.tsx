@@ -1,8 +1,8 @@
-import { IPlayer } from '../interfaces';
+import { AppendOrPrependMode, IPlayer } from '../interfaces';
 import { Spinner } from './Spinner';
 import { Button } from './Button'
-import * as _ from 'underscore';
 import { NumberedList } from './NumberedList';
+import { sample } from 'underscore';
 
 export interface PlayProps
 {
@@ -18,6 +18,7 @@ export interface PlayProps
     handleExitGame(): void;
     displayWordList: boolean;
     waitingForAiToChooseLetter: boolean;
+    appendOrPrependMode: AppendOrPrependMode;
 }
 
 export function Play(props: PlayProps) {
@@ -48,7 +49,7 @@ export function Play(props: PlayProps) {
     
     const buildPossibleWordList = () =>
     {
-        const randomSubsetOfPossibleWords: string[] = _.sample( props.possibleWordList, 20 );
+        const randomSubsetOfPossibleWords: string[] = sample( props.possibleWordList, 20 );
 
         return (
             <>
@@ -78,11 +79,11 @@ export function Play(props: PlayProps) {
             />
 
             <p>Enter the next character:</p>
-            <Button
+            { props.appendOrPrependMode !== "Append Only" && <Button
                 id={ 2 }
                 text="Prepend letter"
                 onClick={ prependChar }
-            />
+            /> }
             <input
                 autoComplete='off'
                 onChange={ props.handleNextCharChange }
@@ -92,11 +93,12 @@ export function Play(props: PlayProps) {
                 value={ props.nextChar }
                 width={5}
             />
+            { props.appendOrPrependMode !== "Prepend Only" && 
             <Button
             id={ 2 }
             text="Append letter"
             onClick={appendChar}
-            />
+            /> }
             <p>Game String:</p>
             <input
                 autoComplete='off'

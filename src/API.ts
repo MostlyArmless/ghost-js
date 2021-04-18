@@ -1,10 +1,19 @@
 import { timeoutPromise } from "./tools";
 
 const serverUrl = process.env.NODE_ENV === "production" ? "https://ghost-word-server.herokuapp.com" : "http://localhost:3001";
-type WordLookupType = "wordsstartingwith" | "wordsendingwith" | "wordscontaining";
+type WordLookupType = "wordsstartingwith" | "wordsendingwith" | "wordscontaining" | "countwordsstartingwith" | "countwordsendingwith" | "countwordscontaining";
+
+export interface IAPI
+{
+    isWord( testWord: string ): Promise<boolean>;
+    getAllWordsContaining( wordPart: string ): Promise<string[]>;
+    getAllWordsStartingWith( wordPart: string ): Promise<string[]>;
+    getAllWordsEndingWith( wordPart: string ): Promise<string[]>;
+    countWordsEndingWith( wordPart: string ): Promise<number>;
+}
 
 // Communicate with the ghost-word-server to check if words exist, get list of possible words given the current string, etc.
-export class API
+export class API implements IAPI
 {
     async pingServer(): Promise<boolean>
     {
@@ -38,50 +47,50 @@ export class API
         }
     }
 
-    async getAllWordsContaining( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+
+    getAllWordsStartingWith = async ( wordPart: string ): Promise<string[]> =>
     {
-        return this.getWords( wordPart, "wordscontaining", saveToState );
+        return await this.getWords( wordPart, "wordsstartingwith" ) as string[];
     }
 
-    async getAllWordsStartingWith( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    getAllWordsEndingWith = async ( wordPart: string ): Promise<string[]> =>
     {
-        return this.getWords( wordPart, "wordsstartingwith", saveToState );
+        return await this.getWords( wordPart, "wordsendingwith" ) as string[];
     }
 
-    async getAllWordsEndingWith( wordPart: string, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    getAllWordsContaining = async ( wordPart: string ): Promise<string[]> =>
     {
-        return this.getWords( wordPart, "wordsendingwith", saveToState );
+        return await this.getWords( wordPart, "wordscontaining" ) as string[];
     }
 
-    private async getWords( wordPart: string, lookupType: WordLookupType, saveToState?: ( possibleWordList: string[] ) => void ): Promise<string[]>
+    countWordsStartingWith = async ( wordPart: string ): Promise<number> =>
+    {
+        return await this.getWords( wordPart, "countwordsstartingwith" ) as number;
+    }
+
+    countWordsEndingWith = async ( wordPart: string ): Promise<number> =>
+    {
+        return await this.getWords( wordPart, "countwordsendingwith" ) as number;
+    }
+
+    countWordsContaining = async ( wordPart: string ): Promise<number> =>
+    {
+        return await this.getWords( wordPart, "countwordscontaining" ) as number;
+    }
+
+    private async getWords( wordPart: string, lookupType: WordLookupType ): Promise<string[] | number>
     {
         try
         {
-            const response = await window.fetch( `${serverUrl}/${lookupType}/${wordPart}` );
+            const url = `${serverUrl}/${lookupType}/${wordPart}`;
+            const response = await window.fetch( url );
             const possibleWordList = await response.json();
-            if ( saveToState !== undefined )
-                saveToState( possibleWordList );
             return possibleWordList;
         }
         catch ( error )
         {
             console.error( error );
             return [];
-        }
-    }
-
-    async countPossibleWords( wordPart: string ): Promise<number>
-    {
-        try
-        {
-            const response = await window.fetch( `${serverUrl}/countpossiblewords/${wordPart}` );
-            const numPossibleWords = await response.json();
-            return numPossibleWords;
-        }
-        catch ( error )
-        {
-            console.error( error );
-            return 0;
         }
     }
 

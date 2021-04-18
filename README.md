@@ -34,3 +34,6 @@ May the best man never spell anything!
 To run this in development mode, just `npm run dev` and then run the VS Code debugger with `F5`. Make sure you `npm start` the [`ghost-word-server`](https://github.com/MostlyArmless/ghost-word-server) first though.
 
 Maybe I should add a PossibleWords property to GhostGame that contains a list of all possible words that could be constructed from the current string, and which updates every turn. This would be a good debugging tool, regardless. When there's lots of matches, it should display a sample 9 words: the 3 shortest words, 3 longest words, and 3 words from the middle of the list. Need to sort the list of candidate words by length and grab the first 3, last 3, and 3 from the middle with an even/odd length if statement.
+
+### Running Mocha Tests
+The Mocha tests are invoked with the Mocha Test Explorer VS Code extension. React wants the tsconfig option `compilerOptions.module` to be set to `esnext`, which it will do every time you run `npm run dev`. However, if you want to run the mocha tests, you must set that option to `commonjs`. You can do this automatically by running `npm run mocha-setup` which will modify the `tsconfig.json` file directly, then you can use the Mocha Test Explorer extension to run the tests. Note that you should stop the debugger and kill the React dev server before doing this.
