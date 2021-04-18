@@ -32,3 +32,14 @@ export function timeoutPromise( ms: number, promise: Promise<any> )
         );
     } )
 }
+
+export function convertEnumValToString<T>( enumClass: T, enumKey: number ): string
+{
+    for ( const enumMember in enumClass )
+    {
+        const index = parseInt( enumMember, 10 );
+        if ( index === enumKey )
+            return enumClass[enumMember] as unknown as string;
+    }
+    return "";
+}
