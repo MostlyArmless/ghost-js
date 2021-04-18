@@ -1,32 +1,33 @@
 # Ghost - A Word Game
 
-## Main Rules
+## Overview
 
-This is a 2+ player word game. The game starts with the first player picking a letter. Taking turns, each player adds a letter to the current string. The first player to spell a real word becomes the Wordsmith, and is immediately killed. However, if you add a letter such that the string no longer _can become_ a word, you lose, but _only_ if the next player catches your bluff.
+Ghost is a 2+ player word game, originally devised as a game for hiking buddies to play spoken aloud while walking. Players take turns adding letters to a string, the first person to spell a real word loses, and you can play against an AI.
 
-On your turn, you can either add a letter to the end of the current string, or if you suspect the player before you couldn't think of a word and was just bluffing, you can challenge the last player's move. If you challenge the previous player, they must provide an example word that could be constructed from the current string (including the letter they just added). If they can't come up with an example, then they're out of the game. But if they _can_, you must be punished for your lack of faith: you're out of the game.
+### Rules of the Game
+1. Players take turns adding 1 letter at a time to a string.
+2. First player to spell a real word loses.
+3. You must always be working towards _some_ real word. If you add a letter that makes it impossible to spell a word, the next player can challenge you. If you can come up with a real word that could be spelled using your letters, the challenger loses, otherwise you lose.
 
-May the best man never spell anything!
+## Features
+* Choose the minimum number of letters the string must contain before it counts as a real word and can get you killed. Default is 4 letters.
+* You can add custom words to the game dictionary
+* You can blacklist words from the dictionary so they won't be automatically recognized as words by the AI players
+* Different game modes: you can choose to allow letters to be added to the end of the string, the beginning, or both!
+* In human-vs-human games, you can choose to enable auto-bluff detection, so the game will call you on your bluffs automatically
+* For fun, you can display a list of possible words that can be spelled given the current game string
+* 2 different AI difficulties:
+  * In Easy mode, the AI doesn't make any plans, it just identifies a random word that it could work towards and adds the next letter. It chooses a different target word each turn.
+  * In Hard mode, the AI will always work towards the same target word, until it is no longer spellable with the current string. It will always try to choose a target word which will prevent it from losing (based on the word's length and the number of players in the game)
 
 ## Future features
 
-1. Bidirectional Ghost: Players can either also add a letter to the _beginning_ of the string
-
+1. Multi-AI play. Currently, the game only supports a single AI player.
 2. House Rules - Challenge & Add Letter VS Challenge Only: Allow users to choose whether a player must also add a letter if their challenge is successful, or if they're allowed to pass
-
-3. Custom Dictionaries: Allow the user to define custom words they want to be considered valid.
-
-4. House Rules - Auto-Kill Bluffers: Let user decide if they want the game to automatically kill players for submitting invalid strings
-
-5. House Rules - Auto-Kill Wordsmith: Let user decide if they want the game to automatically kill players who complete a word, or if they want the next player to be responsible for challenging the Wordsmith
-
-6. House Rules - Character Limits: Allow user to define the minimum number of characters for a string to be considered a word (e.g. set to 4 so that player "ax" + "e" doesn't make you a Wordsmith)
-
-7. House Rules - Play continues after Wordsmith dies: Allow user to decide whether becoming a Wordsmith immediately ends the game, or whether the remaining players are allowed to continue using the string
+3. House Rules - Play continues after Wordsmith dies: Allow user to decide whether becoming a Wordsmith immediately ends the game, or whether the remaining players are allowed to continue using the string
 
 > NOTE: need to make a new temp dictionary by pruning the current string from the real dictionary
 
-1. Difficulty Modes: Implement multiple difficulty levels for AI players by defining different dictionary files containing simple VS rare words that they can draw from when playing, and making it so that the AI won't just randomly select a letter, but will always work towards building a possible word without actually completing it.
 
 
 ## Developer Notes
