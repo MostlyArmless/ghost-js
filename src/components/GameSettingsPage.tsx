@@ -1,9 +1,9 @@
 import { GameSetting } from './GameSetting';
-import { GameSettings, GameSettingKey } from '../interfaces';
+import { IGameSettings, GameSettingKey } from '../interfaces';
 
 interface GameSettingsPageProps
 {
-  gameSettings: GameSettings;
+  gameSettings: IGameSettings;
   handleChangeGameSetting( settingName: GameSettingKey, newValue: number | string ): void;
   handleSettingsDoneClicked(): void;
 }

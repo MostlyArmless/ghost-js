@@ -6,7 +6,7 @@ import { GameSettingsPage } from "./components/GameSettingsPage";
 import { NewGame } from "./components/NewGame";
 import { Play } from "./components/Play";
 import { eGameActions, GameOverReason } from "./constants";
-import { GameSettingKey, GameSettings, IPlayer, PlayerType, AppPage, DifficultyLevel, AppendOrPrependMode } from "./interfaces";
+import { GameSettingKey, IGameSettings, IPlayer, PlayerType, AppPage, DifficultyLevel, AppendOrPrependMode } from "./interfaces";
 import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
@@ -23,7 +23,7 @@ interface AppState
     previousPage: AppPage;
     invalidPlayerNames: boolean;
     players: IPlayer[];
-    gameSettings: GameSettings;
+    gameSettings: IGameSettings;
     nextChar: string;
     gameString: string;
     currentPlayerIndex: number;

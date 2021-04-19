@@ -19,7 +19,7 @@ export interface ISetting
 
 export type GameSettingKey = 'minWordLength' | 'maxNumPlayers' | 'wordRecognitionMode' | 'wordListInGame' | 'appendOrPrependMode';
 
-export interface GameSettings
+export interface IGameSettings
 {
     [key: string]: ISetting
 }
