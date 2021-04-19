@@ -280,18 +280,14 @@ class App extends React.Component<AppProps, AppState> {
 
     handleStartClicked = () =>
     {
-        let names = new Set();
-        for ( let i = 0; i < this.state.players.length; i++ )
+        const names = this.state.players.map( player => player.name );
+        const anyBlankNames = names.filter( name => name.length === 0 ).length > 0;
+        const allNamesUnique = ( new Set( names ) ).size === names.length;
+
+        if ( !allNamesUnique || anyBlankNames )
         {
-            const name = this.state.players[i].name;
-            if ( name.length === 0 || names.has( name ) )
-            {
-                this.setState( {
-                    invalidPlayerNames: true
-                } );
-                return;
-            }
-            names.add( name );
+            this.setState( { invalidPlayerNames: true } );
+            return;
         }
 
         this.roboPlayer.reset();
