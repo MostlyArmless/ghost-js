@@ -1,10 +1,10 @@
 export enum GameOverReason
 {
-    undefined,
-    badBullshitCall,
-    goodBullshitCall,
-    noPossibleWords,
-    finishedWord
+    Undefined,
+    BadBullshitCall,
+    GoodBullshitCall,
+    NoPossibleWords,
+    FinishedWord
 }
 
 export enum WordRecognitionMode

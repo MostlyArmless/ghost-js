@@ -84,7 +84,7 @@ const initialState: AppState = {
     nextChar: "",
     gameString: "",
     currentPlayerIndex: 0,
-    gameOverReason: GameOverReason.undefined,
+    gameOverReason: GameOverReason.Undefined,
     possibleWordList: [],
     loser: initialPlayers[0],
     winner: initialPlayers[1],
@@ -173,12 +173,12 @@ class App extends React.Component<AppProps, AppState> {
         {
             if ( await wordServerApi.isWord( updatedGameString ) )
             {
-                this.gameOver( updatedGameString, GameOverReason.finishedWord, this.getCurrentPlayer() );
+                this.gameOver( updatedGameString, GameOverReason.FinishedWord, this.getCurrentPlayer() );
                 return;
             }
             else if ( this.state.gameSettings.wordRecognitionMode.value === "auto" && await this.state.countPossibleWords( updatedGameString ) === 0 )
             {
-                this.gameOver( updatedGameString, GameOverReason.noPossibleWords, this.getCurrentPlayer() );
+                this.gameOver( updatedGameString, GameOverReason.NoPossibleWords, this.getCurrentPlayer() );
                 return;
             }
         }
@@ -505,13 +505,13 @@ class App extends React.Component<AppProps, AppState> {
             if ( rebuttalWord.length >= minWordLength && await wordServerApi.isWord( rebuttalWord ) )
             {
                 // The word is in the dictionary, so the BS-caller loses
-                this.gameOver( this.state.gameString, GameOverReason.badBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
+                this.gameOver( this.state.gameString, GameOverReason.BadBullshitCall, this.getCurrentPlayer(), this.getPreviousPlayer() );
             }
             else
             {
                 // The word is NOT in the dictionary, so the BS-callee loses
                 // TODO - make it possible for the BS-caller to accept the word anyways (because they know it's really a word), and add it to the dictionary.
-                this.gameOver( this.state.gameString, GameOverReason.goodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
+                this.gameOver( this.state.gameString, GameOverReason.GoodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
             }
         } );
     }
@@ -525,7 +525,7 @@ class App extends React.Component<AppProps, AppState> {
             {
                 this.gameOver(
                     this.state.gameString,
-                    GameOverReason.badBullshitCall,
+                    GameOverReason.BadBullshitCall,
                     this.getCurrentPlayer(),
                     this.getPreviousPlayer()
                 );
@@ -534,7 +534,7 @@ class App extends React.Component<AppProps, AppState> {
             {
                 this.gameOver(
                     this.state.gameString,
-                    GameOverReason.goodBullshitCall,
+                    GameOverReason.GoodBullshitCall,
                     this.getPreviousPlayer(),
                     this.getCurrentPlayer()
                 );

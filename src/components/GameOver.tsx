@@ -49,13 +49,13 @@ export function GameOver( props: GameOverProps )
     {
         switch ( props.gameOverReason )
         {
-            case GameOverReason.finishedWord:
+            case GameOverReason.FinishedWord:
                 return <p>{ props.losingPlayer.name } lost by spelling the word: "{ props.gameString }"</p>;
 
-            case GameOverReason.noPossibleWords:
+            case GameOverReason.NoPossibleWords:
                 return <p>{ props.losingPlayer.name } lost because no word starts with "{ props.gameString }"</p>;
 
-            case GameOverReason.goodBullshitCall:
+            case GameOverReason.GoodBullshitCall:
                 return (
                     <>
                         <p>{ props.losingPlayer.name } lost because { props.winningPlayer.name } correctly called bullshit on them.<br />There are no words that start with "{ props.gameString }"</p>
@@ -63,7 +63,7 @@ export function GameOver( props: GameOverProps )
                     </>
                 );
 
-            case GameOverReason.badBullshitCall:
+            case GameOverReason.BadBullshitCall:
                 return (
                     <>
                         <p>{ props.losingPlayer.name } lost because they incorrectly called bullshit on { props.winningPlayer.name }.</p>
@@ -98,13 +98,13 @@ export function GameOver( props: GameOverProps )
                 onClick={ props.handleNewGame }
             />
             { buildLoserReason() }
-            { props.gameOverReason === GameOverReason.finishedWord &&
+            { props.gameOverReason === GameOverReason.FinishedWord &&
                 <Button
                     text='Blacklist Word'
                     onClick={ addToBlacklist }
                 />
             }
-            { props.gameOverReason === GameOverReason.goodBullshitCall &&
+            { props.gameOverReason === GameOverReason.GoodBullshitCall &&
                 <TextboxAndButton
                     onSubmit={ submitWordToWhitelist }
                     buttonText="Add to Dictionary"
