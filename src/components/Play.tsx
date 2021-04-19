@@ -23,6 +23,17 @@ export interface PlayProps
 
 export function Play(props: PlayProps) {
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) =>
+    {
+        if (event.key !== "Enter")
+            return;
+        
+        if (props.appendOrPrependMode === "Append Only")
+            props.commitAppendChar();
+        else if (props.appendOrPrependMode === "Prepend Only")
+            props.commitPrependChar();
+    }
+
     const validateChar = (): boolean =>
     {
         if ( props.nextChar.length === 0 )
@@ -87,6 +98,7 @@ export function Play(props: PlayProps) {
             <input
                 autoComplete='off'
                 onChange={ props.handleNextCharChange }
+                onKeyDown={ handleKeyDown }
                 type='text'
                 id='nextChar'
                 maxLength={ 1 }
