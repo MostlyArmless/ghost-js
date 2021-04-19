@@ -478,7 +478,7 @@ class App extends React.Component<AppProps, AppState> {
         console.log( `handleCallBullshit` );
         if ( mode === "auto" || this.getPreviousPlayer().type === 'AI' )
         {
-            await this.resolveBullshitCallOnRobot();
+            await this.resolveBullshitCallAutomatically();
             return;
         }
 
@@ -516,8 +516,7 @@ class App extends React.Component<AppProps, AppState> {
         } );
     }
 
-    // Somebody called bullshit on the robot player, we need to evaluate whether it was a good or bad bullshit call.
-    resolveBullshitCallOnRobot = async () =>
+    resolveBullshitCallAutomatically = async () =>
     {
         try
         {
