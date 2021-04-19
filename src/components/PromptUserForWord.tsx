@@ -1,4 +1,5 @@
 import { IPlayer } from '../interfaces';
+import { Button } from './Button';
 import { TextboxAndButton } from './TextboxAndButton';
 
 interface PromptUserForWordProps
@@ -7,6 +8,7 @@ interface PromptUserForWordProps
     previousPlayer: IPlayer;
     gameString: string;
     handleSubmitWord( word: string ): void;
+    handleForfeit(): void;
 }
 
 export function PromptUserForWord( props: PromptUserForWordProps )
@@ -33,6 +35,10 @@ export function PromptUserForWord( props: PromptUserForWordProps )
             <TextboxAndButton
                 buttonText='Submit'
                 onSubmit={ handleSubmitWord }
+            />
+            <Button
+                text="Forfeit"
+                onClick={ props.handleForfeit }
             />
         </>
     );

@@ -129,6 +129,12 @@ class App extends React.Component<AppProps, AppState> {
         return this.state.gameSettings[settingKey].value;
     }
 
+    handleForfeit = (): void =>
+    {
+        // During a bullshit challenge, the challenged player admits they were bluffing.
+        this.gameOver( this.state.gameString, GameOverReason.GoodBullshitCall, this.getPreviousPlayer(), this.getCurrentPlayer() );
+    }
+
     async gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: IPlayer, winner?: IPlayer ): Promise<void>
     {
         console.log( `Game over because ${convertEnumValToString( GameOverReason, gameOverReason )}...` );
@@ -681,6 +687,7 @@ class App extends React.Component<AppProps, AppState> {
                         currentPlayer={ this.getCurrentPlayer() }
                         previousPlayer={ this.getPreviousPlayer() }
                         handleSubmitWord={ this.handleSubmitBullshitRebuttal }
+                        handleForfeit={ this.handleForfeit }
                     />
                 )
                 break;
