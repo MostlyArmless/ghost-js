@@ -1,7 +1,7 @@
-import { RoboPlayer } from "../RoboPlayer";
+import { RoboPlayer } from "../src/RoboPlayer";
 import { expect } from 'chai';
-import { IAPI } from "../API";
-import { eGameActions } from "../constants";
+import { IAPI } from "../src/API";
+import { eGameActions } from "../src/constants";
 
 class MockApi implements IAPI
 {

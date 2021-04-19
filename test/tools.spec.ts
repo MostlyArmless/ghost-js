@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { convertEnumValToString } from "../tools";
+import { convertEnumValToString } from "../src/tools";
 
 enum MyEnum
 {
