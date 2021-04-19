@@ -1,21 +1,36 @@
-import { IAPI } from "./API";
 import { eGameActions } from "./constants";
-import { AppendOrPrependMode, DifficultyLevel, ILetterChoosingStrategy } from "./interfaces";
+import { AppendOrPrependMode, DifficultyLevel } from "./interfaces";
 import { chooseRandomLetter, convertEnumValToString, getRandomElementFromArray } from "./tools";
+
+export type TGetWordsFunc = ( gameString: string ) => Promise<string[]>;
+export type TCountWordsFunc = ( gameString: string ) => Promise<number>;
+type TChooseLetterFunc = ( targetWord: string, gameString: string ) => string;
 
 export class RoboPlayer
 {
-    private API: IAPI;
+    private getPossibleWords: TGetWordsFunc;
+    private countPossibleWords: TCountWordsFunc;
     private difficulty: DifficultyLevel;
     private targetWord: string;
     private numPlayersInGame: number;
 
-    constructor( API: IAPI, difficulty: DifficultyLevel, numPlayersInGame: number )
+    constructor( getPossibleWords: TGetWordsFunc, countPossibleWords: TCountWordsFunc, difficulty: DifficultyLevel, numPlayersInGame: number )
     {
-        this.API = API;
+        this.getPossibleWords = getPossibleWords;
+        this.countPossibleWords = countPossibleWords;
         this.difficulty = difficulty;
         this.targetWord = "";
         this.numPlayersInGame = numPlayersInGame;
+    }
+
+    setGetPossibleWords( func: TGetWordsFunc ): void
+    {
+        this.getPossibleWords = func;
+    }
+
+    setCountPossibleWords( func: TCountWordsFunc ): void
+    {
+        this.countPossibleWords = func;
     }
 
     setTargetWordForUnitTestPurposes( targetWord: string ): void
@@ -38,31 +53,14 @@ export class RoboPlayer
         this.numPlayersInGame = numPlayersInGame;
     }
 
-    private shouldCallBullshit = async ( gameString: string, appendOrPrependMode: AppendOrPrependMode ): Promise<boolean> =>
+    private shouldCallBullshit = async ( gameString: string ): Promise<boolean> =>
     {
-        // TODO make these calls more efficient by implementing a "count" API for each of them
-        let possibleWords: string[] = [];
-        switch ( appendOrPrependMode )
-        {
-            case "Append Only":
-                possibleWords = await this.API.getAllWordsStartingWith( gameString );
-                break;
-            case "Prepend Only":
-                possibleWords = await this.API.getAllWordsEndingWith( gameString );
-                break;
-            case "Append or Prepend":
-                possibleWords = await this.API.getAllWordsContaining( gameString );
-                break;
-            default:
-                return false;
-        }
-        console.log( possibleWords.length );
-        return possibleWords.length === 0;
+        return ( await this.countPossibleWords( gameString ) ) === 0;
     }
 
     decideNextMove = async ( gameString: string, appendOrPrependMode: AppendOrPrependMode ): Promise<eGameActions> =>
     {
-        if ( await this.shouldCallBullshit( gameString, appendOrPrependMode ) )
+        if ( await this.shouldCallBullshit( gameString ) )
         {
             console.log( `robot wants to call BS on gameString "${gameString}"` );
             return eGameActions.CallBullshit;
@@ -106,7 +104,7 @@ export class RoboPlayer
         return randomWord;
     }
 
-    private choseNextLetter = async ( gameString: string, choosingStrategy: ILetterChoosingStrategy ) =>
+    private choseNextLetter = async ( gameString: string, choosingStrategy: TChooseLetterFunc ) =>
     {
         // AI will choose the next letter based on the current string
         console.log( `Choosing letter for ${this.difficulty} AI to append, with current string = "${gameString}"...` );
@@ -114,7 +112,7 @@ export class RoboPlayer
             return chooseRandomLetter();
 
         // Use the provided choosing strategy to identify the possible words we could strive for
-        const possibleWordList = await choosingStrategy.getPossibleWords( gameString );
+        const possibleWordList = await this.getPossibleWords( gameString );
         console.log( `AI identified ${possibleWordList.length} possible words for "${gameString}"` );
 
         // If there are no possible remaining words, just randomly guess a letter and hope the next player fails to call our bluff
@@ -139,24 +137,16 @@ export class RoboPlayer
         }
 
         console.log( `AI target word = "${this.targetWord}"` );
-        return choosingStrategy.chooseNextLetter( this.targetWord, gameString ) ?? chooseRandomLetter();
+        return choosingStrategy( this.targetWord, gameString ) ?? chooseRandomLetter();
     }
 
     chooseLetterToAppend = async ( gameString: string ) =>
     {
-        return await this.choseNextLetter( gameString,
-            {
-                getPossibleWords: this.API.getAllWordsStartingWith,
-                chooseNextLetter: ( targetWord: string, gameString: string ) => targetWord[gameString.length]
-            } );
+        return await this.choseNextLetter( gameString, ( targetWord: string, gameString: string ) => targetWord[gameString.length] );
     };
 
     chooseLetterToPrepend = async ( gameString: string ) =>
     {
-        return await this.choseNextLetter( gameString,
-            {
-                getPossibleWords: this.API.getAllWordsEndingWith,
-                chooseNextLetter: ( targetWord: string, gameString: string ) => targetWord[targetWord.length - gameString.length - 1]
-            } );
+        return await this.choseNextLetter( gameString, ( targetWord: string, gameString: string ) => targetWord[targetWord.length - gameString.length - 1] );
     };
 }

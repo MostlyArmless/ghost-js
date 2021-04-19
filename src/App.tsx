@@ -116,7 +116,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         super( props );
         this.state = initialState;
-        this.roboPlayer = new RoboPlayer( wordServerApi, "Hard", 2 );
+        this.roboPlayer = new RoboPlayer( this.state.getPossibleWords, this.state.countPossibleWords, "Hard", 2 );
     }
 
     getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
@@ -353,8 +353,6 @@ class App extends React.Component<AppProps, AppState> {
     setGameSetting = ( settingName: GameSettingKey, value: number | string | boolean ) =>
     {
         const validSettings = this.getGameSettingValidOptions( settingName );
-        console.log( typeof ( value ) );
-        console.log( typeof ( validSettings[0] ) );
 
         switch ( typeof ( validSettings[0] ) )
         {
@@ -408,6 +406,10 @@ class App extends React.Component<AppProps, AppState> {
                 getPossibleWords: settingName === "appendOrPrependMode" ? updatedGetPossibleWords : previousState.getPossibleWords,
                 countPossibleWords: settingName === "appendOrPrependMode" ? updatedCountPossibleWords : previousState.countPossibleWords,
             };
+        }, () =>
+        {
+            this.roboPlayer.setGetPossibleWords( this.state.getPossibleWords );
+            this.roboPlayer.setCountPossibleWords( this.state.countPossibleWords );
         } );
     };
 
