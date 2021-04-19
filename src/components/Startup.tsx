@@ -8,76 +8,37 @@ interface StartupProps
     handleNewGame(): void;
 }
 
-interface StartupState
+export function Startup( props: StartupProps )
 {
-    serverIsLoaded: boolean;
-    serverCannotBeReached: boolean;
-}
+    const [serverIsLoaded, setServerIsLoaded] = React.useState( false );
+    const [serverCannotBeReached, setServerCannotBeReached] = React.useState( false );
 
-const initialState: StartupState = {
-    serverIsLoaded: false,
-    serverCannotBeReached: false
-}
-
-export class Startup extends React.Component<StartupProps, StartupState>
-{
-    constructor( props: StartupProps )
+    const pingServer = React.useCallback( async () =>
     {
-        super( props );
-        this.state = initialState;
-    }
+        const isServerOnline = await props.waitForServerToComeOnline();
+        setServerIsLoaded( isServerOnline );
+        setServerCannotBeReached( !isServerOnline );
+    }, [props] );
 
-    async componentDidMount()
+    React.useEffect( () =>
     {
-        this.setState( { serverIsLoaded: false }, this.pingServer );
-    }
+        setServerIsLoaded( false );
+        pingServer();
+    }, [pingServer] );
 
-    pingServer = async () =>
-    {
-        const isServerOnline = await this.props.waitForServerToComeOnline();
-        if ( isServerOnline )
-        {
-            this.setState( {
-                serverIsLoaded: true,
-                serverCannotBeReached: false
-            } );
-        }
-        else
-        {
-            this.setState( {
-                serverIsLoaded: false,
-                serverCannotBeReached: true
-            } );
-        }
-    }
-
-    render()
-    {
-        let message;
-        if ( this.state.serverCannotBeReached )
-        {
-            message = <p>Server didn't respond within the timeout. Try refreshing the page.</p>
-        }
-        else if ( this.state.serverIsLoaded )
-        {
-            message = <Button
+    return (
+        <>
+            <h2>Welcome to ghost-js!</h2>
+            { serverCannotBeReached && <p>Server didn't respond within the timeout. Try refreshing the page.</p> }
+            { serverIsLoaded && <Button
                 text="New Game"
-                onClick={ this.props.handleNewGame } />;
-        }
-        else
-        {
-            message = <p>Waiting for Heroku ghost-word-server to come online...</p>;
-        }
+                onClick={ props.handleNewGame } /> }
+            { ( !serverCannotBeReached && !serverIsLoaded ) &&
+                <p>Waiting for Heroku ghost-word-server to come online...</p> }
+            <Spinner
+                loading={ !serverIsLoaded && !serverCannotBeReached }
+            />
 
-        return (
-            <>
-                <h2>Welcome to ghost-js!</h2>
-                { message }
-                <Spinner
-                    loading={ !this.state.serverIsLoaded && !this.state.serverCannotBeReached }
-                />
-
-            </>
-        );
-    }
+        </>
+    );
 }

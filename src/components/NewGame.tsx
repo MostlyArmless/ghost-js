@@ -52,7 +52,7 @@ export function NewGame( props: NewGameProps )
         return props.playerList.map( ( player, id ) =>
         {
             return ( <div key={ id + "_div" }>
-                <NameField playerName={ player.name } id={ id } handleChangeName={ props.handleRenamePlayer } />
+                <NameField playerName={ player.name } id={ id } handleRenamePlayer={ props.handleRenamePlayer } />
 
                 <PlayerTypeSelect id={ id } playerType={ player.type } handleChangePlayerType={ props.handleChangePlayerType } />
 

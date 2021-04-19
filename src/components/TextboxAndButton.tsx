@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { Button } from './Button';
 
 interface TextboxAndButtonProps
@@ -8,69 +8,33 @@ interface TextboxAndButtonProps
     id?: string;
 }
 
-interface TextboxAndButtonState
+export function TextboxAndButton( props: TextboxAndButtonProps )
 {
-    textboxContent: string;
-}
+    const [textboxContent, setTextboxContent] = useState( '' );
 
-const initialState: TextboxAndButtonState = {
-    textboxContent: ''
-}
-
-export class TextboxAndButton extends React.Component<TextboxAndButtonProps, TextboxAndButtonState>
-{
-    constructor( props: TextboxAndButtonProps )
+    const submitAndReset = async () =>
     {
-        super( props );
-        this.state = initialState;
+        await props.onSubmit( textboxContent );
+        setTextboxContent( '' );
     }
 
-    reset = () =>
-    {
-        this.setState( initialState );
-    }
+    return (
+        <>
+            <input
+                autoComplete='off'
+                onChange={ ( event ) => { setTextboxContent( event.target.value ) } }
+                id={ `${props.id}_textbox` }
+                type='text'
+                maxLength={ 50 }
+                onKeyDown={ ( event ) => { if ( event.key === "Enter" ) submitAndReset(); } }
+                value={ textboxContent }
+            />
 
-    submitAndReset = async () =>
-    {
-        await this.props.onSubmit( this.state.textboxContent );
-        this.reset();
-    }
-
-    handleTextChanged = ( event: any ) =>
-    {
-        this.setState( { textboxContent: event.target.value } );
-    }
-
-    onKeyDown = ( event: React.KeyboardEvent<HTMLInputElement> ) =>
-    {
-        if ( event.key === "Enter" )
-            this.submitAndReset();
-    }
-
-    onClick = () =>
-    {
-        this.submitAndReset();
-    }
-
-    render()
-    {
-        return (
-            <>
-                <input
-                    autoComplete='off'
-                    onChange={ this.handleTextChanged }
-                    id={ `${this.props.id}_textbox` }
-                    type='text'
-                    maxLength={ 50 }
-                    onKeyDown={ this.onKeyDown }
-                    value={ this.state.textboxContent }
-                />
-                <Button
-                    text={ this.props.buttonText }
-                    onClick={ this.onClick }
-                    id={ `${this.props.id}_button` }
-                />
-            </>
-        );
-    }
+            <Button
+                text={ props.buttonText }
+                onClick={ submitAndReset }
+                id={ `${props.id}_button` }
+            />
+        </>
+    );
 }

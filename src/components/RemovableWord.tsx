@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import { Button } from './Button';
 
 interface RemovableWordProps
@@ -7,47 +7,28 @@ interface RemovableWordProps
     handleRemoveWord( word: string ): void;
 }
 
-interface RemovableWordState
+export function RemovableWord( props: RemovableWordProps )
 {
-    hasBeenRemoved: boolean;
-}
+    const [removed, setRemoved] = useState( false );
 
-const initialState: RemovableWordState = {
-    hasBeenRemoved: false
-}
-
-const alreadyRemovedText = " - (Removed from dictionary)";
-
-export class RemovableWord extends React.Component<RemovableWordProps, RemovableWordState>
-{
-    constructor( props: RemovableWordProps )
+    const handleClick = () =>
     {
-        super( props );
-        this.state = initialState;
-    }
-
-    handleClick = () =>
-    {
-        if ( this.state.hasBeenRemoved )
+        if ( removed )
             return;
 
-        this.props.handleRemoveWord( this.props.word );
-        this.setState( { hasBeenRemoved: true } );
+        props.handleRemoveWord( props.word );
+        setRemoved( true );
     }
 
-    render()
-    {
-
-        const removeButton = <Button
-            text='Remove from Dictionary'
-            onClick={ this.handleClick }
-        />;
-
-        return (
-            <>
-                { this.props.word }
-                { this.state.hasBeenRemoved ? alreadyRemovedText : removeButton }
-            </>
-        );
-    }
+    return (
+        <>
+            { props.word }
+            { removed
+                ? " - (Removed from dictionary)"
+                : <Button
+                    text='Remove from Dictionary'
+                    onClick={ handleClick }
+                /> }
+        </>
+    );
 }

@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 interface ButtonProps
 {
   id?: string | number;
@@ -8,31 +6,21 @@ interface ButtonProps
   text: string;
 }
 
-interface ButtonState
+export function Button( props: ButtonProps )
 {
-
-}
-
-export class Button extends React.Component<ButtonProps, ButtonState>
-{
-  handleClick = () =>
+  const handleClick = () =>
   {
-    if ( this.props.onClick )
-    {
-      this.props.onClick( this.props.id );
-    }
+    if ( props.onClick )
+      props.onClick( props.id );
   };
 
-  render()
-  {
-    return (
-      <button
-        key={ this.props.id }
-        onClick={ this.handleClick }
-        className={ this.props.className }
-      >
-        { this.props.text }
-      </button>
-    );
-  }
+  return (
+    <button
+      key={ props.id }
+      onClick={ handleClick }
+      className={ props.className }
+    >
+      { props.text }
+    </button>
+  );
 }

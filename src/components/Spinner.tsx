@@ -27,6 +27,7 @@ export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
         this.timerID = 0;
     }
 
+    // TODO - figure out how to implement this lifecycle func with react hooks, then convert this class to a func component
     componentWillUnmount()
     {
         clearInterval( this.timerID );
