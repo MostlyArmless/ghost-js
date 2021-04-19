@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 interface NumberedListProps
 {
     data: string[];
@@ -7,7 +5,6 @@ interface NumberedListProps
 
 export function NumberedList( props: NumberedListProps )
 {
-
     return (
         <ol>
             { props.data.map( ( item: string ) =>

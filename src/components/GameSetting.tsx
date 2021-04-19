@@ -1,4 +1,3 @@
-import React from 'react';
 import { GameSettingKey } from '../interfaces';
 
 interface GameSettingProps
