@@ -115,7 +115,7 @@ class App extends React.Component<AppProps, AppState> {
     {
         super( props );
         this.state = initialState;
-        this.roboPlayer = new RoboPlayer( wordServerApi, "Hard", 2 ); // TODO default this to Easy instead
+        this.roboPlayer = new RoboPlayer( wordServerApi, "Hard", 2 );
     }
 
     getGameSettingValidOptions( settingKey: GameSettingKey ): any[]
