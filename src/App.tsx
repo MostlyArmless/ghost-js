@@ -11,6 +11,7 @@ import { HelpPage } from "./components/HelpPage";
 import { PromptUserForWord } from "./components/PromptUserForWord";
 import { Startup } from "./components/Startup";
 import { RoboPlayer } from "./RoboPlayer";
+import { convertEnumValToString } from "./tools";
 
 const wordServerApi = new API();
 
@@ -130,7 +131,7 @@ class App extends React.Component<AppProps, AppState> {
 
     async gameOver( updatedGameString: string, gameOverReason: GameOverReason, loser: IPlayer, winner?: IPlayer ): Promise<void>
     {
-        console.log( `Game over because ${gameOverReason}...` );
+        console.log( `Game over because ${convertEnumValToString( GameOverReason, gameOverReason )}...` );
         const possibleWords = await this.state.getPossibleWords( this.state.gameString );
 
         this.setState( prev =>
