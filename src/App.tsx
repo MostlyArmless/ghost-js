@@ -91,8 +91,8 @@ const initialState: AppState = {
     rebuttalWord: '',
     whitelistedWords: [],
     blacklistedWords: [],
-    getPossibleWords: wordServerApi.getAllWordsEndingWith,
-    countPossibleWords: wordServerApi.countWordsEndingWith,
+    getPossibleWords: wordServerApi.getAllWordsStartingWith,
+    countPossibleWords: wordServerApi.countWordsStartingWith,
 };
 
 const newGameState: Partial<AppState> = {
