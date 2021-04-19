@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ENTER_KEY_CODE } from '../constants';
 import { Button } from './Button';
 
 interface TextboxAndButtonProps
@@ -44,10 +43,8 @@ export class TextboxAndButton extends React.Component<TextboxAndButtonProps, Tex
 
     onKeyDown = ( event: React.KeyboardEvent<HTMLInputElement> ) =>
     {
-        if ( event.keyCode === ENTER_KEY_CODE )
-        {
+        if ( event.key === "Enter" )
             this.submitAndReset();
-        }
     }
 
     onClick = () =>

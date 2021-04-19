@@ -19,5 +19,3 @@ export enum eGameActions
     PrependLetter,
     CallBullshit
 }
-
-export const ENTER_KEY_CODE = 13;
